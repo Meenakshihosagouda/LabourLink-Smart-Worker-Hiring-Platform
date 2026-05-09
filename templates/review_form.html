@@ -1,0 +1,146 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Submit Review | LABOURLINK{% endblock %}
+
+{% block extra_css %}
+<style>
+    .review-hero {
+        background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+        color: white;
+        padding: 60px 24px;
+        text-align: center;
+        border-radius: 0 0 40px 40px;
+    }
+
+    .review-card {
+        max-width: 500px;
+        margin: -40px auto 60px;
+        background: white;
+        padding: 40px;
+        border-radius: 24px;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        text-align: center;
+    }
+
+    /* Star Rating System */
+    .rating-container {
+        display: flex;
+        flex-direction: row-reverse;
+        justify-content: center;
+        gap: 12px;
+        margin: 24px 0;
+    }
+
+    .rating-container input {
+        display: none;
+    }
+
+    .rating-container label {
+        font-size: 40px;
+        color: #e2e8f0;
+        cursor: pointer;
+        transition: color 0.2s;
+    }
+
+    .rating-container label:hover,
+    .rating-container label:hover~label,
+    .rating-container input:checked~label {
+        color: #fbbf24;
+    }
+
+    textarea {
+        width: 100%;
+        padding: 16px;
+        border-radius: 12px;
+        border: 2px solid #f1f5f9;
+        font-size: 15px;
+        transition: all 0.3s;
+        outline: none;
+        background: #f8fafc;
+        resize: none;
+        margin-bottom: 24px;
+    }
+
+    textarea:focus {
+        border-color: #3A3E6C;
+        background: white;
+        box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+    }
+
+    .btn-submit {
+        width: 100%;
+        padding: 16px;
+        background: #3A3E6C;
+        color: white;
+        border: none;
+        border-radius: 12px;
+        font-size: 16px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+
+    .btn-submit:hover {
+        background: #0f172a;
+        transform: translateY(-2px);
+    }
+
+    .professional-info {
+        margin-bottom: 24px;
+    }
+
+    .professional-info h2 {
+        margin: 0;
+        font-size: 24px;
+        color: #0f172a;
+    }
+
+    .professional-info p {
+        color: #64748b;
+        margin: 4px 0 0 0;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="review-hero">
+    <h1 style="margin:0; font-size:32px;">Share Your Experience</h1>
+    <p style="opacity:0.8; margin-top:10px;">Help others find the best professionals by leaving a rating and review.</p>
+</div>
+
+<div class="review-card">
+    <div class="professional-info">
+        {% if hire %}
+        <h2>{{ hire.worker.user.username }}</h2>
+        <p>{{ hire.worker.service.name }}</p>
+        {% elif bulk_request %}
+        <h2>{{ bulk_request.contractor.company_name }}</h2>
+        <p>{{ bulk_request.service.name }} (Bulk Project)</p>
+        {% endif %}
+    </div>
+
+    <form method="post">
+        {% csrf_token %}
+
+        <div style="font-weight: 700; color: #64748b; margin-bottom: 8px;">Select Rating</div>
+        <div class="rating-container">
+            <input type="radio" name="rating" value="5" id="5" required><label for="5">★</label>
+            <input type="radio" name="rating" value="4" id="4"><label for="4">★</label>
+            <input type="radio" name="rating" value="3" id="3"><label for="3">★</label>
+            <input type="radio" name="rating" value="2" id="2"><label for="2">★</label>
+            <input type="radio" name="rating" value="1" id="1"><label for="1">★</label>
+        </div>
+
+        <textarea name="comment" rows="4" placeholder="How was your experience? (Optional Review)"></textarea>
+
+        <button type="submit" class="btn-submit">Submit Review</button>
+    </form>
+</div>
+{% endblock %}
+
+
+
+
+
+

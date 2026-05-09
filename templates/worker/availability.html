@@ -1,0 +1,270 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Availability Control | LABOURLINK{% endblock %}
+
+{% block extra_css %}
+<style>
+    .dashboard-hero {
+        background: linear-gradient(135deg, #0A1123 0%, #1e293b 100%);
+        color: white;
+        padding: 60px 24px;
+        border-radius: 0 0 60px 60px;
+        margin-bottom: 40px;
+        text-align: center;
+        position: relative;
+    }
+
+    .dashboard-hero::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 60px;
+        background: linear-gradient(to top, var(--bg) 0%, transparent 100%);
+    }
+
+    .main-container {
+        max-width: 800px;
+        margin: -40px auto 60px auto;
+        padding: 0 20px;
+        position: relative;
+        z-index: 10;
+    }
+
+    .card {
+        background: white;
+        border-radius: 40px;
+        padding: 48px;
+        box-shadow: 0 30px 60px rgba(0, 0, 0, 0.08);
+        border: 1px solid rgba(0, 0, 0, 0.03);
+        margin-bottom: 24px;
+        color: #0A1123;
+        text-align: center;
+        opacity: 0;
+        transform: translateY(30px);
+        transition: all 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .card.reveal {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    .status-ring {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        margin: 0 auto 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+    }
+
+    .status-ring::before {
+        content: '';
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        border: 8px solid #e2e8f0;
+    }
+
+    .status-online .status-ring::after {
+        content: '';
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        border: 8px solid #10b981;
+        border-top-color: transparent;
+        animation: spin 2s linear infinite;
+    }
+
+    @keyframes spin {
+        100% {
+            transform: rotate(360deg);
+        }
+    }
+
+    .status-badge {
+        display: inline-block;
+        padding: 12px 32px;
+        border-radius: 50px;
+        font-size: 14px;
+        font-weight: 900;
+        margin-bottom: 32px;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+    }
+
+    .status-online .status-badge {
+        background: #dcfce7;
+        color: #059669;
+        border: 2px solid #059669;
+        box-shadow: 0 0 20px rgba(16, 185, 129, 0.2);
+    }
+
+    .status-offline .status-badge {
+        background: #f1f5f9;
+        color: #64748b;
+        border: 2px solid #cbd5e1;
+    }
+
+    .status-online .status-ring svg { fill: #10b981; }
+    .status-offline .status-ring svg { fill: #94a3b8; }
+
+    .toggle-btn {
+        display: block;
+        width: 100%;
+        max-width: 400px;
+        margin: 32px auto 0;
+        padding: 20px;
+        border-radius: 20px;
+        font-size: 18px;
+        font-weight: 800;
+        text-decoration: none;
+        transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .btn-go-online {
+        background: #10b981;
+        color: white;
+        box-shadow: 0 10px 25px rgba(16, 185, 129, 0.3);
+    }
+
+    .btn-go-online:hover {
+        transform: scale(1.05);
+        box-shadow: 0 15px 35px rgba(16, 185, 129, 0.4);
+    }
+
+    .btn-go-offline {
+        background: #0A1123;
+        color: white;
+        box-shadow: 0 10px 25px rgba(10, 17, 35, 0.3);
+    }
+
+    .btn-go-offline:hover {
+        transform: scale(1.05);
+        box-shadow: 0 15px 35px rgba(10, 17, 35, 0.4);
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 24px;
+        margin-top: 64px;
+    }
+
+    .stat-card {
+        background: #f8fafc;
+        padding: 24px;
+        border-radius: 24px;
+        border: 1px solid #e2e8f0;
+        transition: transform 0.3s;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-8px);
+    }
+
+    .stat-val {
+        font-size: 32px;
+        font-weight: 900;
+        color: #0A1123;
+        margin-bottom: 8px;
+    }
+
+    .stat-label {
+        font-size: 11px;
+        font-weight: 800;
+        color: #64748b;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .back-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 24px;
+        color: white;
+        text-decoration: none;
+        font-weight: 700;
+        opacity: 0.8;
+        transition: opacity 0.3s;
+    }
+
+    .back-link:hover {
+        opacity: 1;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-hero">
+    <div style="max-width: 800px; margin: 0 auto;">
+        <a href="{% url 'worker_home' %}" class="back-link">
+            <svg style="width:20px;height:20px;fill:currentColor" viewBox="0 0 24 24">
+                <path d="M20,11V13H8L13.5,18.5L12.08,19.92L4.16,12L12.08,4.08L13.5,5.5L8,11H20Z" />
+            </svg>
+            BACK TO SUMMARY
+        </a>
+        <h1 style="margin:0; font-size:42px; font-weight:900;">Visibility Center</h1>
+        <p style="margin:16px 0 0; opacity:0.7; font-size:18px;">Toggle your active status on the global network.</p>
+    </div>
+</div>
+
+<div class="main-container">
+    <div class="card reveal-init {% if worker.is_available %}status-online{% else %}status-offline{% endif %}">
+        <div class="status-ring">
+            <svg style="width:48px;height:48px;"
+                viewBox="0 0 24 24">
+                {% if worker.is_available %}
+                <path
+                    d="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M12,20A8,8 0 0,1 4,12A8,8 0 0,1 12,4A8,8 0 0,1 20,12A8,8 0 0,1 12,20M11,7V13L16.2,16.1L17,14.9L12.5,12.2V7H11Z" />
+                {% else %}
+                <path
+                    d="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M12,20A8,8 0 0,1 4,12A8,8 0 0,1 12,4A8,8 0 0,1 20,12A8,8 0 0,1 12,20M16.5,11H15V8.5L12,11.5L9,8.5V11H7.5V13H9V15.5L12,12.5L15,15.5V13H16.5" />
+                {% endif %}
+            </svg>
+        </div>
+
+        <div class="status-badge">
+            {{ worker.is_available|yesno:"BROADCASTING ONLINE,SYSTEM OFFLINE" }}
+        </div>
+
+        <p style="color:#475569; font-size:16px; line-height:1.7; max-width: 500px; margin: 0 auto;">
+            {% if worker.is_available %}
+            You are currently visible to all customers in the network. New missions can be assigned to your station.
+            {% else %}
+            Your profile is currently hidden from search results. No active deployments can be initiated by customers.
+            {% endif %}
+        </p>
+
+        <a href="{% url 'toggle_worker' %}"
+            class="toggle-btn {% if worker.is_available %}btn-go-offline{% else %}btn-go-online{% endif %}">
+            {% if worker.is_available %}DEACTIVATE STATION{% else %}ACTIVATE STATION{% endif %}
+        </a>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-val">{{ worker.success_rate }}%</div>
+                <div class="stat-label">RELIABILITY INDEX</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        setTimeout(() => {
+            document.querySelector('.card.reveal-init').classList.add('reveal');
+        }, 100);
+    });
+</script>
+{% endblock %}

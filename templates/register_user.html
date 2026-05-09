@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Join LABOURLINK | Create Account{% endblock %}
+
+{% block chatbot %}{% endblock %}
+
+{% block extra_css %}
+<style>
+  .reg-hero {
+    background: linear-gradient(135deg, #0A1123 0%, #3A3E6C 100%);
+    color: #DEDCDC;
+    padding: 60px 24px;
+    text-align: center;
+    border-radius: 0 0 40px 40px;
+  }
+
+  .form-card {
+    max-width: 500px;
+    margin: -40px auto 60px;
+    background: #8387C3;
+    padding: 40px;
+    border-radius: 24px;
+    box-shadow: 0 20px 40px rgba(25, 29, 35, 0.1);
+    border: 1px solid #3A3E6C;
+  }
+
+  .form-group {
+    margin-bottom: 20px;
+  }
+
+  .form-group label {
+    display: block;
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: #0A1123;
+  }
+
+  input {
+    width: 100%;
+    padding: 14px;
+    border-radius: 12px;
+    border: 2px solid #3A3E6C;
+    font-size: 15px;
+    transition: all 0.3s;
+    outline: none;
+    background: #DEDCDC;
+  }
+
+  input:focus {
+    border-color: #0A1123;
+    background: white;
+    box-shadow: 0 0 0 4px rgba(86, 84, 73, 0.1);
+  }
+
+  .btn-submit {
+    width: 100%;
+    padding: 16px;
+    background: #3A3E6C;
+    color: #DEDCDC;
+    border: none;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+
+  .btn-submit:hover {
+    background: #0A1123;
+    transform: translateY(-2px);
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="reg-hero">
+  <h1 style="margin:0; font-size:32px;">Create Your Account</h1>
+  <p style="opacity:0.8; margin-top:10px;">Join the community to find the best local professionals.</p>
+</div>
+
+<div class="form-card">
+  <form method="post">
+    {% csrf_token %}
+
+    <div class="form-group">
+      <label>Username</label>
+      <input name="username" placeholder="Pick a unique username" required>
+    </div>
+
+    <div class="form-group">
+      <label>First Name</label>
+      <input name="first_name" placeholder="Your first name" required>
+    </div>
+
+    <div class="form-group">
+      <label>Email Address</label>
+      <input type="email" name="email" placeholder="e.g. yourname@gmail.com" required>
+    </div>
+
+    <div class="form-group">
+      <label>Phone Number</label>
+      <input type="tel" name="phone" maxlength="10" pattern="\d{10}" oninput="this.value = this.value.replace(/[^0-9]/g, '');" placeholder="e.g. +91 9876543210" required>
+    </div>
+
+    <div class="form-group">
+      <label>Password</label>
+      <input type="password" name="password" placeholder="Choose a secure password" required>
+    </div>
+
+    <button type="submit" class="btn-submit">Create My Account</button>
+
+    <div style="margin-top:24px; text-align:center; font-size:14px; color:#3A3E6C;">
+      Already have an account? <a href="{% url 'login' %}"
+        style="color:#0A1123; font-weight:700; text-decoration:none;">Sign In</a>
+    </div>
+  </form>
+</div>
+{% endblock %}
+
+
+
+
+
+

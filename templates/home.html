@@ -1,0 +1,1103 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}LABOURLINK | Home Services{% endblock %}
+
+{% block extra_css %}
+<style>
+  :root {
+    --primary-blue: #3A3E6C;
+    --navy-black: #0A1123;
+  }
+
+  body {
+    overflow-x: hidden;
+    background: #0A1123;
+  }
+
+  /* Slider Container */
+  .slider {
+    height: 100vh;
+    /* Restore full height */
+    width: 100vw;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .slide {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 10%;
+    opacity: 0;
+    transition: transform 1s cubic-bezier(0.7, 0, 0.3, 1), opacity 0.8s ease;
+    z-index: 1;
+    pointer-events: none;
+  }
+
+  .slide.active {
+    opacity: 1;
+    z-index: 10;
+    pointer-events: auto;
+  }
+
+  /* Background Transitions */
+  .slide-bg {
+    position: absolute;
+    inset: 0;
+    background-size: cover;
+    background-position: center;
+    z-index: -1;
+    transform: scale(1.1);
+    transition: transform 8s linear;
+  }
+
+  .slide.active .slide-bg {
+    transform: scale(1);
+  }
+
+  .slide-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom,
+        rgba(10, 17, 35, 0.3) 0%,
+        rgba(10, 17, 35, 0.6) 50%,
+        rgba(10, 17, 35, 0.85) 100%);
+    z-index: 0;
+  }
+
+  /* Content Styling */
+  .content-main {
+    max-width: 600px;
+    z-index: 5;
+    color: #DEDCDC;
+    transform: translateX(-100px);
+    opacity: 0;
+    transition: all 0.8s cubic-bezier(0.19, 1, 0.22, 1) 0.3s;
+  }
+
+  .slide.active .content-main {
+    transform: translateX(0);
+    opacity: 1;
+  }
+
+  .category-label {
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--secondary);
+    margin-bottom: 20px;
+    display: block;
+  }
+
+  .headline {
+    font-size: clamp(54px, 10vw, 110px);
+    font-weight: 900;
+    line-height: 0.85;
+    margin-bottom: 30px;
+    text-transform: uppercase;
+    letter-spacing: -3px;
+    color: white;
+  }
+
+  .description {
+    font-size: 18px;
+    color: rgba(255, 255, 255, 0.8);
+    max-width: 450px;
+    margin-bottom: 40px;
+    line-height: 1.6;
+  }
+
+  .btn-explore {
+    display: inline-flex;
+    align-items: center;
+    gap: 15px;
+    background: #3A3E6C;
+    color: white;
+    padding: 18px 40px;
+    border-radius: 4px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: all 0.3s;
+    border: none;
+    cursor: pointer;
+  }
+
+  .btn-explore:hover {
+    background: white;
+    color: var(--navy-black);
+    transform: translateX(10px);
+  }
+
+  /* Floating Cards Area */
+  .cards-tray {
+    position: relative;
+    display: flex;
+    gap: 30px;
+    z-index: 5;
+    transform: translateX(100px);
+    opacity: 0;
+    transition: all 1s cubic-bezier(0.19, 1, 0.22, 1) 0.5s;
+  }
+
+  .slide.active .cards-tray {
+    transform: translateX(0);
+    opacity: 1;
+  }
+
+  .feature-card {
+    width: 220px;
+    height: 320px;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 16px;
+    overflow: hidden;
+    position: relative;
+    transition: transform 0.5s ease;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  }
+
+  .feature-card:hover {
+    transform: translateY(-20px) scale(1.05);
+  }
+
+  .feature-card img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0.8;
+  }
+
+  .card-label {
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    color: white;
+    font-weight: 700;
+    font-size: 14px;
+    z-index: 2;
+  }
+
+  .bookmark-btn {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    width: 35px;
+    height: 35px;
+    background: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--navy-black);
+    font-size: 14px;
+  }
+
+  /* UI Decorations */
+  .sideline {
+    position: absolute;
+    left: 50px;
+    top: 50%;
+    transform: translateY(-50%);
+    height: 300px;
+    width: 1px;
+    background: rgba(255, 255, 255, 0.2);
+    z-index: 100;
+  }
+
+  .slide-numbers {
+    position: absolute;
+    left: 45px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    gap: 60px;
+    z-index: 100;
+  }
+
+  .num-indicator {
+    color: #64748b;
+    /* Solid gray */
+    font-weight: 800;
+    font-size: 12px;
+    cursor: pointer;
+    transition: color 0.3s;
+  }
+
+  .num-indicator.active {
+    color: white;
+    font-size: 16px;
+  }
+
+  .scroll-controls {
+    position: absolute;
+    bottom: 50px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 20px;
+    z-index: 100;
+  }
+
+  .control-btn {
+    width: 50px;
+    height: 50px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    background: transparent;
+    cursor: pointer;
+    transition: all 0.3s;
+    font-size: 20px;
+    z-index: 110;
+  }
+
+  .control-btn:hover {
+    background: white;
+    color: var(--navy-black);
+  }
+
+  @media (max-width: 900px) {
+    .slide {
+      flex-direction: column;
+      justify-content: center;
+      padding: 120px 24px;
+    }
+
+    .cards-tray {
+      display: none;
+    }
+
+    .headline {
+      font-size: 60px;
+    }
+  }
+
+  /* Premium Popular Services Section */
+  .popular-services {
+    background: radial-gradient(circle at bottom left, #111827 0%, #0A1123 100%);
+    padding: 120px 8%;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .popular-services::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+  }
+
+  .popular-header h2 {
+    font-size: clamp(36px, 5vw, 56px);
+    font-weight: 900;
+    color: white;
+    margin-bottom: 20px;
+    letter-spacing: -1.5px;
+    line-height: 1.1;
+  }
+
+  .popular-header p {
+    color: rgba(255, 255, 255, 0.5);
+    margin-bottom: 80px;
+    font-size: 18px;
+    font-weight: 300;
+  }
+
+  .services-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 40px;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+
+  .premium-card {
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 32px;
+    padding: 0;
+    text-align: center;
+    transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: 320px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .premium-card .card-img {
+    width: 100%;
+    height: 180px;
+    object-fit: cover;
+    display: block;
+    border-radius: 32px 32px 0 0;
+    transition: transform 0.6s cubic-bezier(0.19, 1, 0.22, 1);
+  }
+
+  .premium-card:hover .card-img {
+    transform: scale(1.06);
+  }
+
+  .premium-card .card-inner {
+    padding: 28px 32px 36px;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .premium-card::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at top right, rgba(58, 62, 108, 0.2), transparent 70%);
+    opacity: 0;
+    transition: opacity 0.5s ease;
+  }
+
+  .premium-card:hover {
+    transform: translateY(-20px) scale(1.02);
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(255, 255, 255, 0.2);
+    box-shadow: 0 40px 80px rgba(0, 0, 0, 0.4);
+  }
+
+  .premium-card:hover::after {
+    opacity: 1;
+  }
+
+  .icon-holder {
+    display: none;
+    width: 72px;
+    height: 72px;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 20px;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    color: white;
+    margin-bottom: 32px;
+    transition: all 0.5s ease;
+  }
+
+  .premium-card:hover .icon-holder {
+    transform: rotateY(180deg);
+    background: #3A3E6C;
+    border-color: transparent;
+    box-shadow: 0 10px 30px rgba(58, 62, 108, 0.3);
+  }
+
+  .premium-card h3 {
+    font-size: 26px;
+    font-weight: 800;
+    color: white;
+    margin: 20px 0 16px;
+    letter-spacing: -0.5px;
+  }
+
+  .premium-card p {
+    color: rgba(255, 255, 255, 0.4);
+    font-size: 16px;
+    margin-bottom: 32px;
+    line-height: 1.6;
+    font-weight: 300;
+  }
+
+  .btn-browse {
+    background: rgba(255, 255, 255, 0.08);
+    color: white;
+    padding: 16px 24px;
+    border-radius: 16px;
+    text-align: center;
+    font-weight: 700;
+    transition: all 0.3s;
+    font-size: 15px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    letter-spacing: 0.5px;
+  }
+
+  .premium-card:hover .btn-browse {
+    background: white;
+    color: #0A1123;
+  }
+
+  /* Show More/Less Toggle */
+  .hidden-service {
+    display: none;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.4s ease;
+  }
+
+  .hidden-service.visible {
+    display: flex;
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .toggle-container {
+    margin-top: 50px;
+    display: flex;
+    justify-content: center;
+  }
+
+  .show-more-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    background: transparent;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    color: white;
+    padding: 16px 48px;
+    border-radius: 20px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    cursor: pointer;
+    transition: all 0.4s cubic-bezier(0.19, 1, 0.22, 1);
+  }
+
+  .show-more-btn:hover {
+    background: white;
+    color: #0A1123;
+    border-color: white;
+    transform: translateY(-5px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+  }
+
+  /* Luxury Redesign for Booking Steps */
+  .booking-steps {
+    background: radial-gradient(circle at top right, #0a1f33 0%, #050b18 100%);
+    padding: 50px 5%;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .booking-steps::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(20, 184, 166, 0.05) 0%, transparent 100%);
+    pointer-events: none;
+  }
+
+  .cinematic-header {
+    text-align: center;
+    margin-bottom: 40px;
+    z-index: 10;
+    position: relative;
+  }
+
+  .cinematic-header h2 {
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 8px;
+    color: #c5a059;
+    margin-bottom: 24px;
+    text-transform: uppercase;
+  }
+
+  .cinematic-header .title-main {
+    font-size: clamp(40px, 6vw, 72px);
+    font-weight: 900;
+    color: white;
+    letter-spacing: -2px;
+    line-height: 1;
+  }
+
+  .luxury-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    max-width: 1400px;
+    margin: 0 auto 40px;
+    gap: 40px;
+    position: relative;
+    z-index: 10;
+  }
+
+  .luxury-row.row-reverse {
+    flex-direction: row-reverse;
+  }
+
+  .luxury-content {
+    flex: 1;
+    max-width: 500px;
+    padding: 40px;
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 40px;
+    box-shadow: 0 40px 100px rgba(0, 0, 0, 0.5);
+    opacity: 0;
+    transform: translateY(40px);
+    transition: all 1.2s cubic-bezier(0.19, 1, 0.22, 1);
+  }
+
+  .luxury-content.revealed {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .luxury-label {
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 5px;
+    color: #c5a059;
+    margin-bottom: 30px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+  }
+
+  .luxury-label::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(to right, #c5a059, transparent);
+  }
+
+  .luxury-content h3 {
+    font-size: clamp(28px, 4vw, 48px);
+    font-weight: 900;
+    color: white;
+    margin-bottom: 25px;
+    line-height: 1.1;
+    letter-spacing: -1.5px;
+  }
+
+  .luxury-content p {
+    font-size: 17px;
+    color: rgba(255, 255, 255, 0.5);
+    line-height: 1.8;
+    font-weight: 300;
+  }
+
+  .luxury-image-card {
+    flex: 1.2;
+    position: relative;
+    opacity: 0;
+    transition: all 1.5s cubic-bezier(0.19, 1, 0.22, 1);
+  }
+
+  .luxury-row:not(.row-reverse) .luxury-image-card {
+    transform: translateX(-100px);
+  }
+
+  .luxury-row.row-reverse .luxury-image-card {
+    transform: translateX(100px);
+  }
+
+  .luxury-image-card.revealed {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+
+  .luxury-row.row-reverse .luxury-image-card {
+    transform: translateX(100px);
+  }
+
+  .luxury-image-card.revealed {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+
+  .luxury-image-card::after {
+    content: "";
+    position: absolute;
+    inset: -20px;
+    background: radial-gradient(circle at center, rgba(197, 160, 89, 0.15) 0%, transparent 70%);
+    z-index: -1;
+    filter: blur(40px);
+    opacity: 0.5;
+  }
+
+  .card-frame {
+    width: 100%;
+    height: 450px;
+    overflow: hidden;
+    position: relative;
+    box-shadow: 0 50px 100px rgba(0, 0, 0, 0.6);
+    transition: all 0.8s cubic-bezier(0.19, 1, 0.22, 1);
+  }
+
+  /* Variations in framing */
+  .frame-oval {
+    border-radius: 300px;
+  }
+
+  .frame-rectangle {
+    border-radius: 60px;
+  }
+
+  .luxury-image-card:hover .card-frame {
+    transform: translateY(-15px) rotate(1deg);
+    box-shadow: 0 70px 120px rgba(197, 160, 89, 0.2);
+  }
+
+  .luxury-image-card img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transform: scale(1.1);
+    transition: transform 1.5s cubic-bezier(0.19, 1, 0.22, 1);
+  }
+
+  .luxury-image-card:hover img {
+    transform: scale(1);
+  }
+
+  @media (max-width: 1100px) {
+    .luxury-row {
+      flex-direction: column !important;
+      gap: 100px;
+    }
+
+    .luxury-content {
+      padding: 40px;
+      order: 2;
+    }
+
+    .luxury-image-card {
+      width: 100%;
+      order: 1;
+    }
+
+    .card-frame {
+      height: 400px;
+    }
+  }
+
+  @media (max-width: 900px) {
+    .popular-services {
+      padding: 60px 24px;
+    }
+
+    .steps-container {
+      flex-direction: column;
+      align-items: center;
+    }
+  }
+
+  /* Modal Styling */
+  .modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(10, 17, 35, 0.8);
+    backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+  }
+
+  .modal-overlay.active {
+    opacity: 1;
+    pointer-events: all;
+  }
+
+  .selection-modal {
+    background: #0A1123;
+    padding: 30px;
+    border-radius: 24px;
+    width: 90%;
+    max-width: 500px;
+    text-align: center;
+    transform: translateY(20px);
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+  }
+
+  .modal-overlay.active .selection-modal {
+    transform: translateY(0);
+  }
+
+  .modal-title {
+    font-size: 24px;
+    font-weight: 800;
+    color: white;
+    margin-bottom: 10px;
+  }
+
+  .modal-desc {
+    color: rgba(255, 255, 255, 0.6);
+    margin-bottom: 30px;
+    font-size: 15px;
+  }
+
+  .selection-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+
+  .selection-card {
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.05);
+    padding: 20px;
+    border-radius: 16px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-decoration: none;
+    color: white;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .selection-card:hover {
+    border-color: #3A3E6C;
+    background: rgba(255, 255, 255, 0.1);
+  }
+
+  .selection-icon {
+    font-size: 32px;
+    margin-bottom: 12px;
+    color: #3A3E6C;
+  }
+
+  .selection-label {
+    font-weight: 700;
+    color: white;
+    font-size: 14px;
+  }
+
+  .close-modal {
+    margin-top: 24px;
+    background: rgba(255, 255, 255, 0.1);
+    border: none;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 14px;
+    transition: all 0.2s ease;
+  }
+
+  .close-modal:hover {
+    background: rgba(255, 255, 255, 0.2);
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="slider">
+
+  <div class="sideline"></div>
+  <div class="slide-numbers">
+    <div class="num-indicator active" data-index="0">01</div>
+    <div class="num-indicator" data-index="1">02</div>
+    <div class="num-indicator" data-index="2">03</div>
+  </div>
+
+  <!-- Slide 1 -->
+  <div class="slide active">
+    <div class="slide-bg"
+      style="background-image: url('{% static 'images/hero_home_repair.png' %}')">
+    </div>
+    <div class="slide-overlay"></div>
+
+    <div class="content-main">
+      <span class="category-label">Home Repair</span>
+      <h1 class="headline">EXPERT<br>SERVICE</h1>
+      <p class="description">From electrical faults to plumbing emergencies, our verified experts are ready to restore
+        your home's harmony.</p>
+      <a href="{% url 'services' %}" class="btn-explore">Find Helpers &rarr;</a>
+    </div>
+
+  </div>
+
+  <!-- Slide 2 -->
+  <div class="slide">
+    <div class="slide-bg"
+      style="background-image: url('{% static 'images/hero_master_craft.png' %}')">
+    </div>
+    <div class="slide-overlay"></div>
+
+    <div class="content-main">
+      <span class="category-label">Interior Improvement</span>
+      <h1 class="headline">MASTER<br>CRAFT</h1>
+      <p class="description">Upgrade your living space with master carpenters and professional painters. Quality work
+        guaranteed.</p>
+      <a href="{% url 'services' %}" class="btn-explore">See Professionals &rarr;</a>
+    </div>
+  </div>
+
+  <!-- Slide 3 -->
+  <div class="slide">
+    <div class="slide-bg"
+      style="background-image: url('{% static 'images/hero_garden_care.png' %}')">
+    </div>
+    <div class="slide-overlay"></div>
+
+    <div class="content-main">
+      <span class="category-label">Outdoor & Maintenance</span>
+      <h1 class="headline">GARDEN<br>CARE</h1>
+      <p class="description">Keep your outdoors looking pristine with our gardening and general maintenance experts.
+      </p>
+      <a href="{% url 'services' %}" class="btn-explore">Explore Services &rarr;</a>
+    </div>
+  </div>
+
+
+  <div class="scroll-controls">
+    <button class="control-btn prev-btn">&#8592;</button>
+    <button class="control-btn next-btn">&#8594;</button>
+  </div>
+</div>
+
+<!-- Popular Services -->
+<section class="popular-services">
+  <div class="popular-header">
+    <h2>Most Popular Services</h2>
+    <p>Handpicked professionals for your every need</p>
+  </div>
+
+  <div class="services-grid">
+    {% for service in services|slice:":6" %}
+    <div class="premium-card js-reveal" style="transition-delay: {{ forloop.counter|add:2 }}00ms;">
+      <img class="card-img"
+        src="{% if 'Electric' in service.name %}https://images.unsplash.com/photo-1621905251189-08b45d6a269e?auto=format&fit=crop&q=80&w=600{% elif 'Plumb' in service.name %}https://images.unsplash.com/photo-1558618666-fcd25c85cd64?auto=format&fit=crop&q=80&w=600{% elif 'Carp' in service.name %}https://images.unsplash.com/photo-1504148455328-c376907d081c?auto=format&fit=crop&q=80&w=600{% elif 'Paint' in service.name %}https://images.unsplash.com/photo-1562259949-e8e7689d7828?auto=format&fit=crop&q=80&w=600{% elif 'Tile' in service.name %}https://images.unsplash.com/photo-1600585152220-90363fe7e115?auto=format&fit=crop&q=80&w=600{% elif 'Demol' in service.name %}https://images.unsplash.com/photo-1504307651254-35680f356dfd?auto=format&fit=crop&q=80&w=600{% elif 'Garden' in service.name %}https://images.unsplash.com/photo-1416879595882-3373a0480b5b?auto=format&fit=crop&q=80&w=600{% elif 'Clean' in service.name %}https://images.unsplash.com/photo-1581578731548-c64695cc6952?auto=format&fit=crop&q=80&w=600{% elif 'Weld' in service.name %}https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?auto=format&fit=crop&q=80&w=600{% elif 'Waterproof' in service.name %}https://images.unsplash.com/photo-1584622650111-993a426fbf0a?auto=format&fit=crop&q=80&w=600{% elif 'Event' in service.name or 'Decor' in service.name %}https://images.unsplash.com/photo-1464366400600-7168b8af9bc3?auto=format&fit=crop&q=80&w=600{% elif 'Mason' in service.name %}https://images.unsplash.com/photo-1590527735337-5e6b7c1e1c9b?auto=format&fit=crop&q=80&w=600{% elif 'Pack' in service.name or 'Mover' in service.name %}https://images.unsplash.com/photo-1600518464441-9154a4dea21b?auto=format&fit=crop&q=80&w=600{% elif 'Warehouse' in service.name %}https://images.unsplash.com/photo-1553413077-190dd305871c?auto=format&fit=crop&q=80&w=600{% elif 'Load' in service.name or 'Unload' in service.name %}https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?auto=format&fit=crop&q=80&w=600{% elif 'Organiz' in service.name or 'Organizer' in service.name %}https://images.unsplash.com/photo-1558618666-fcd25c85cd64?auto=format&fit=crop&q=80&w=600{% elif 'Pest' in service.name %}https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?auto=format&fit=crop&q=80&w=600{% elif 'Roof' in service.name %}https://images.unsplash.com/photo-1632759145351-1d592919f522?auto=format&fit=crop&q=80&w=600{% elif 'AC' in service.name or 'Air Con' in service.name or 'HVAC' in service.name %}https://images.unsplash.com/photo-1631545806609-67eff42a5b85?auto=format&fit=crop&q=80&w=600{% elif 'Security' in service.name or 'CCTV' in service.name %}https://images.unsplash.com/photo-1558002038-1055907df827?auto=format&fit=crop&q=80&w=600{% elif 'Stage' in service.name %}https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&q=80&w=600{% elif 'Light' in service.name %}https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&q=80&w=600{% elif 'Drive' in service.name or 'Driver' in service.name %}https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?auto=format&fit=crop&q=80&w=600{% elif 'Car Wash' in service.name %}https://images.unsplash.com/photo-1520340356584-f9917d1eea6f?auto=format&fit=crop&q=80&w=600{% elif 'Bike Wash' in service.name %}https://images.unsplash.com/photo-1558981403-c5f9899a28bc?auto=format&fit=crop&q=80&w=600{% elif 'Cook' in service.name %}https://images.unsplash.com/photo-1577219491135-ce391730fb2c?auto=format&fit=crop&q=80&w=600{% elif 'Help' in service.name or 'Household' in service.name %}https://images.unsplash.com/photo-1584820927498-cafe2c1c69c9?auto=format&fit=crop&q=80&w=600{% elif 'Tank' in service.name %}https://images.unsplash.com/photo-1542013936693-884638332954?auto=format&fit=crop&q=80&w=600{% elif 'Bounce' in service.name or 'Bouncer' in service.name %}https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&q=80&w=600{% else %}https://images.unsplash.com/photo-1503387762-592deb58ef4e?auto=format&fit=crop&q=80&w=600{% endif %}"
+        alt="{{ service.name }}">
+      <div class="card-inner">
+        <div>
+          <h3 style="margin: 10px 0;">{{ service.name }}</h3>
+          <p>{{ service.desc|truncatewords:12 }}</p>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+
+    <!-- Hidden services (revealed on click) -->
+    {% for service in services|slice:"6:" %}
+    <div class="premium-card hidden-service">
+      <img class="card-img"
+        src="{% if 'Electric' in service.name %}https://images.unsplash.com/photo-1621905251189-08b45d6a269e?auto=format&fit=crop&q=80&w=600{% elif 'Plumb' in service.name %}https://images.unsplash.com/photo-1558618666-fcd25c85cd64?auto=format&fit=crop&q=80&w=600{% elif 'Carp' in service.name %}https://images.unsplash.com/photo-1504148455328-c376907d081c?auto=format&fit=crop&q=80&w=600{% elif 'Paint' in service.name %}https://images.unsplash.com/photo-1562259949-e8e7689d7828?auto=format&fit=crop&q=80&w=600{% elif 'Tile' in service.name %}https://images.unsplash.com/photo-1600585152220-90363fe7e115?auto=format&fit=crop&q=80&w=600{% elif 'Demol' in service.name %}https://images.unsplash.com/photo-1504307651254-35680f356dfd?auto=format&fit=crop&q=80&w=600{% elif 'Garden' in service.name %}https://images.unsplash.com/photo-1416879595882-3373a0480b5b?auto=format&fit=crop&q=80&w=600{% elif 'Clean' in service.name %}https://images.unsplash.com/photo-1581578731548-c64695cc6952?auto=format&fit=crop&q=80&w=600{% elif 'Weld' in service.name %}https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?auto=format&fit=crop&q=80&w=600{% elif 'Waterproof' in service.name %}https://images.unsplash.com/photo-1584622650111-993a426fbf0a?auto=format&fit=crop&q=80&w=600{% elif 'Event' in service.name or 'Decor' in service.name %}https://images.unsplash.com/photo-1464366400600-7168b8af9bc3?auto=format&fit=crop&q=80&w=600{% elif 'Mason' in service.name %}https://images.unsplash.com/photo-1590527735337-5e6b7c1e1c9b?auto=format&fit=crop&q=80&w=600{% elif 'Pack' in service.name or 'Mover' in service.name %}https://images.unsplash.com/photo-1600518464441-9154a4dea21b?auto=format&fit=crop&q=80&w=600{% elif 'Warehouse' in service.name %}https://images.unsplash.com/photo-1553413077-190dd305871c?auto=format&fit=crop&q=80&w=600{% elif 'Load' in service.name or 'Unload' in service.name %}https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?auto=format&fit=crop&q=80&w=600{% elif 'Organiz' in service.name or 'Home O' in service.name %}https://images.unsplash.com/photo-1558618666-fcd25c85cd64?auto=format&fit=crop&q=80&w=600{% elif 'Pest' in service.name %}https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?auto=format&fit=crop&q=80&w=600{% elif 'Roof' in service.name %}https://images.unsplash.com/photo-1632759145351-1d592919f522?auto=format&fit=crop&q=80&w=600{% elif 'AC' in service.name or 'Air Con' in service.name or 'HVAC' in service.name %}https://images.unsplash.com/photo-1631545806609-67eff42a5b85?auto=format&fit=crop&q=80&w=600{% elif 'Security' in service.name or 'CCTV' in service.name %}https://images.unsplash.com/photo-1558002038-1055907df827?auto=format&fit=crop&q=80&w=600{% elif 'Stage' in service.name %}https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&q=80&w=600{% elif 'Light' in service.name %}https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&q=80&w=600{% elif 'Drive' in service.name %}https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?auto=format&fit=crop&q=80&w=600{% elif 'Car Wash' in service.name %}https://images.unsplash.com/photo-1520340356584-f9917d1eea6f?auto=format&fit=crop&q=80&w=600{% elif 'Bike Wash' in service.name %}https://images.unsplash.com/photo-1558981403-c5f9899a28bc?auto=format&fit=crop&q=80&w=600{% elif 'Cook' in service.name %}https://images.unsplash.com/photo-1577219491135-ce391730fb2c?auto=format&fit=crop&q=80&w=600{% elif 'Help' in service.name and 'Household' in service.name %}https://images.unsplash.com/photo-1584820927498-cafe2c1c69c9?auto=format&fit=crop&q=80&w=600{% elif 'Tank' in service.name %}https://images.unsplash.com/photo-1542013936693-884638332954?auto=format&fit=crop&q=80&w=600{% else %}https://images.unsplash.com/photo-1503387762-592deb58ef4e?auto=format&fit=crop&q=80&w=600{% endif %}"
+        alt="{{ service.name }}">
+      <div class="card-inner">
+        <div>
+          <h3 style="margin: 10px 0;">{{ service.name }}</h3>
+          <p>{{ service.desc|truncatewords:12 }}</p>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div> <!-- Close services-grid -->
+
+  <div class="toggle-container">
+    <a href="{% url 'services' %}" class="show-more-btn" style="text-decoration:none;">View All Services &rarr;</a>
+  </div>
+</section>
+
+<!-- Selection Modal for Hire Mode -->
+<div class="modal-overlay" id="selectionModal">
+  <div class="selection-modal">
+    <h3 class="modal-title">Select Hiring Mode</h3>
+    <p class="modal-desc">How would you like to hire for <span id="serviceName"
+        style="color:var(--primary-blue); font-weight:700;">Service</span>?</p>
+
+    <div class="selection-grid">
+      <a href="#" id="individualLink" class="selection-card">
+        <div class="selection-icon"><i class="fas fa-user"></i></div>
+        <div class="selection-label">Individual Worker</div>
+      </a>
+
+      <a href="#" id="bulkLink" class="selection-card">
+        <div class="selection-icon"><i class="fas fa-users"></i></div>
+        <div class="selection-label">Bulk Hire Team</div>
+      </a>
+    </div>
+
+    <button class="close-modal" onclick="closeModal()">Cancel</button>
+  </div>
+</div>
+
+<script>
+  function openSelectionModal(serviceName, slug) {
+    document.getElementById('serviceName').textContent = serviceName;
+    document.getElementById('individualLink').href = `/service/${slug}/`;
+    document.getElementById('bulkLink').href = `/bulk-hire/?service=${slug}`;
+
+    document.getElementById('selectionModal').classList.add('active');
+  }
+
+  function closeModal() {
+    document.getElementById('selectionModal').classList.remove('active');
+  }
+
+  // Close on click outside
+  document.getElementById('selectionModal').addEventListener('click', function (e) {
+    if (e.target === this) {
+      closeModal();
+    }
+  });
+</script>
+
+<!-- Experience Seamless Booking (Luxury Design) -->
+<section class="booking-steps">
+  <div class="cinematic-header">
+    <h2>EXPERIENCE</h2>
+    <div class="title-main">SEAMLESS HIRING</div>
+  </div>
+
+  <!-- Step 1 (Image Right, Text Left) -->
+  <div class="luxury-row row-reverse">
+    <div class="luxury-image-card">
+      <div class="card-frame frame-oval">
+        <img src="https://images.unsplash.com/photo-1621905251189-08b45d6a269e?auto=format&fit=crop&q=80&w=1200"
+          alt="Find Your Expert">
+      </div>
+    </div>
+    <div class="luxury-content">
+      <div class="luxury-label">STEP 01</div>
+      <h3>Find Your<br>Expert</h3>
+      <p>
+        Browse through our curated list of verified professionals based on your specific needs.
+        Whether it's plumbing, electrical, or home maintenance, we have the right expert for you.
+      </p>
+    </div>
+  </div>
+
+  <!-- Step 2 (Image Left, Text Right) -->
+  <div class="luxury-row">
+    <div class="luxury-image-card">
+      <div class="card-frame frame-rectangle">
+        <img src="https://images.unsplash.com/photo-1506784365847-bbad939e9335?auto=format&fit=crop&q=80&w=1200"
+          alt="Book a Slot">
+      </div>
+    </div>
+    <div class="luxury-content">
+      <div class="luxury-label">STEP 02</div>
+      <h3>Book a<br>Slot</h3>
+      <p>
+        Choose a time that works for you. Our real-time availability system ensures no conflicts,
+        giving you full control over your schedule.
+      </p>
+    </div>
+  </div>
+
+  <!-- Step 3 (Image Right, Text Left) -->
+  <div class="luxury-row row-reverse">
+    <div class="luxury-image-card">
+      <div class="card-frame frame-oval">
+        <img src="https://images.unsplash.com/photo-1590650516494-0c8e4a4dd67e?auto=format&fit=crop&q=80&w=1200"
+          alt="Relax & Resolve">
+      </div>
+    </div>
+    <div class="luxury-content">
+      <div class="luxury-label">STEP 03</div>
+      <h3>Relax &<br>Resolve</h3>
+      <p>
+        Sit back while our expert handles the job. Pay securely only after you're satisfied with the results.
+        Peace of mind is just a book away.
+      </p>
+    </div>
+  </div>
+</section>
+
+<script>
+  // Slider Logic
+  const slides = document.querySelectorAll('.slide');
+  const numIndicators = document.querySelectorAll('.num-indicator');
+  const nextBtn = document.querySelector('.next-btn');
+  const prevBtn = document.querySelector('.prev-btn');
+  let currentSlide = 0;
+  const totalSlides = slides.length;
+
+  function showSlide(index) {
+    slides.forEach(slide => slide.classList.remove('active'));
+    numIndicators.forEach(ind => ind.classList.remove('active'));
+
+    currentSlide = (index + totalSlides) % totalSlides;
+
+    slides[currentSlide].classList.add('active');
+    numIndicators[currentSlide].classList.add('active');
+  }
+
+  nextBtn.addEventListener('click', () => showSlide(currentSlide + 1));
+  prevBtn.addEventListener('click', () => showSlide(currentSlide - 1));
+
+  // Auto slide
+  setInterval(() => showSlide(currentSlide + 1), 6000);
+
+  numIndicators.forEach(ind => {
+    ind.addEventListener('click', () => {
+      showSlide(parseInt(ind.getAttribute('data-index')));
+    });
+  });
+
+
+
+  // Scroll Reveal for Booking Steps & Cinematic Section
+  const observerOptions = {
+    threshold: 0.2
+  };
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('revealed');
+      }
+    });
+  }, observerOptions);
+
+  document.querySelectorAll('.numbered-step').forEach(el => observer.observe(el));
+  document.querySelectorAll('.cinematic-header').forEach(el => observer.observe(el));
+  document.querySelectorAll('.luxury-content').forEach(el => observer.observe(el));
+  document.querySelectorAll('.luxury-image-card').forEach(el => observer.observe(el));
+
+  // Reveal animations for service cards
+  const revealObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('revealed');
+        entry.target.style.opacity = "1";
+        entry.target.style.transform = "translateY(0)";
+      }
+    });
+  }, { threshold: 0.1 });
+
+  document.querySelectorAll('.js-reveal').forEach(el => {
+    el.style.opacity = "0";
+    el.style.transform = "translateY(40px)";
+    el.style.transition = "all 0.8s cubic-bezier(0.19, 1, 0.22, 1)";
+    revealObserver.observe(el);
+  });
+
+
+</script>
+{% endblock %}

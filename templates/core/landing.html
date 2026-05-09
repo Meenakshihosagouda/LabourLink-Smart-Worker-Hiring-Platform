@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LABOURLINK | Premium Home Services</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- React & Babel CDNs -->
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <!-- Framer Motion -->
+    <script src="https://unpkg.com/framer-motion@10.16.4/dist/framer-motion.js"></script>
+
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            scroll-behavior: smooth;
+        }
+
+        .glass {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .service-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(79, 70, 229, 0.1);
+        }
+    </style>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#4F46E5',
+                        'primary-dark': '#4338CA',
+                        'primary-light': '#EEF2FF',
+                        dark: '#0F172A',
+                    },
+                    borderRadius: {
+                        '3xl': '1.5rem',
+                        '4xl': '2rem',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+
+<body class="bg-gray-50 text-dark overflow-x-hidden">
+    <div id="root"></div>
+
+    {% verbatim %}
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+        const { motion, AnimatePresence } = FramerMotion;
+
+        // --- Data ---
+        const services = [
+            { id: 1, name: "Tiles Worker", icon: "Grid", desc: "Expert floor and wall tile installation." },
+            { id: 2, name: "Demolition Worker", icon: "Hammer", desc: "Professional breaking and debris removal." },
+            { id: 3, name: "Waterproofing", icon: "Droplets", desc: "Advanced solutions for leak-free homes." },
+            { id: 4, name: "Welder", icon: "Zap", desc: "High-quality metalwork and repairs." },
+            { id: 5, name: "Event Decorator", icon: "PartyPopper", desc: "Stunning themes for your special days." },
+            { id: 6, name: "Stage Setup", icon: "Layout", desc: "Rock-solid platforms for every event." },
+            { id: 7, name: "Lighting Tech", icon: "Lightbulb", desc: "Professional event lighting setups." },
+            { id: 8, name: "Driver on Hire", icon: "Car", desc: "Verified chauffeurs at your service." },
+            { id: 9, name: "Car Wash", icon: "Sparkles", desc: "Premium mobile cleaning and detailing." },
+            { id: 10, name: "Bike Wash", icon: "Bike", desc: "Expert care for your two-wheeler." },
+            { id: 11, name: "Professional Cook", icon: "Utensils", desc: "Delicious meals prepared at your home." },
+            { id: 12, name: "Household Helper", icon: "Home", desc: "Reliable assistance for daily tasks." },
+            { id: 13, name: "Gardener", icon: "Flower2", desc: "Lush green care for your garden." },
+            { id: 14, name: "Pest Control", icon: "Bug", desc: "Safe and effective pest removal." },
+            { id: 15, name: "Packers & Movers", icon: "Package", desc: "Stress-free shifting and packing." },
+            { id: 16, name: "Loading Worker", icon: "Move", desc: "Heavy lifting handled with care." },
+            { id: 17, name: "Bouncer", icon: "Shield", desc: "Professional security for your events." },
+            { id: 18, name: "Water Tank Cleaning", icon: "Waves", desc: "Hygienic cleaning for your water supply." },
+            { id: 19, name: "Home Organizer", icon: "Box", desc: "Declutter and organize your living spaces." },
+            { id: 20, name: "Warehouse Labour", icon: "Warehouse", desc: "Efficient support for storage and inventory." },
+        ];
+
+        const steps = [
+            { title: "Search Service", desc: "Choose from 20+ vetted categories.", icon: "Search" },
+            { title: "Book Instantly", desc: "Pick a time that works for you.", icon: "Calendar" },
+            { title: "Professional Arrives", desc: "Trained expert reaches your door.", icon: "UserCheck" },
+            { title: "Job Done", desc: "Sit back and enjoy the results.", icon: "CheckCircle" },
+        ];
+
+        const features = [
+            { title: "Verified Professionals", desc: "Every pro undergoes a strict background check and skill assessment.", icon: "ShieldCheck" },
+            { title: "Affordable Pricing", desc: "Transparent upfront pricing with no hidden charges or surprises.", icon: "Tag" },
+            { title: "Quick Service", desc: "Book in seconds and get service in as little as 60 minutes.", icon: "Zap" },
+            { title: "24/7 Support", desc: "Our dedicated support team is always here to assist you.", icon: "Headphones" },
+        ];
+
+        const testimonials = [
+            { name: "Rahul Sharma", role: "Homeowner", text: "The car wash service was incredible. They arrived on time and my car looks brand new!", avatar: "https://i.pravatar.cc/150?u=rahul" },
+            { name: "Priya Patel", role: "Event Manager", text: "LABOURLINK's lighting technicians are top-notch. They transformed our wedding venue into something magical.", avatar: "https://i.pravatar.cc/150?u=priya" },
+            { name: "Anish Gupta", role: "Software Engineer", text: "I regularly book the gardener and cook. It saves me so much time and the quality is consistently high.", avatar: "https://i.pravatar.cc/150?u=anish" },
+        ];
+
+        // --- Components ---
+
+        const Button = ({ children, variant = 'primary', className = '', ...props }) => {
+            const baseStyles = "px-6 py-3 rounded-full font-bold transition-all duration-300 active:scale-95 flex items-center justify-center gap-2 text-[15px]";
+            const variants = {
+                primary: "bg-primary text-white hover:bg-primary-dark shadow-lg shadow-primary/20",
+                secondary: "bg-white text-primary border-2 border-primary hover:bg-primary-light",
+                dark: "bg-dark text-white hover:bg-gray-800",
+                ghost: "bg-transparent text-gray-600 hover:bg-gray-100"
+            };
+            return (
+                <button className={`${baseStyles} ${variants[variant]} ${className}`} {...props}>
+                    {children}
+                </button>
+            );
+        };
+
+        const ServiceCard = ({ service }) => {
+            return (
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    whileHover={{ y: -10 }}
+                    className="p-8 bg-white rounded-4xl border border-gray-100 shadow-sm hover:shadow-2xl hover:border-primary/10 transition-all duration-500 group"
+                >
+                    <div className="w-16 h-16 bg-gradient-to-br from-primary-light to-white rounded-3xl flex items-center justify-center mb-8 group-hover:rotate-6 transition-transform shadow-inner">
+                        <i data-lucide={service.icon} className="text-primary w-8 h-8"></i>
+                    </div>
+                    <h3 className="text-xl font-bold mb-3 text-dark group-hover:text-primary transition-colors tracking-tight">{service.name}</h3>
+                    <p className="text-gray-500 text-[14px] leading-relaxed mb-6">{service.desc}</p>
+                    <div className="flex items-center text-primary font-bold text-sm gap-1 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-[-10px] group-hover:translate-x-0">
+                        Book Now <i data-lucide="ArrowRight" className="w-4 h-4"></i>
+                    </div>
+                </motion.div>
+            );
+        };
+
+        const App = () => {
+            useEffect(() => {
+                lucide.createIcons();
+                console.log("LABOURLINK Premium Home Page Loaded Successfully");
+            }, []);
+
+            return (
+                <div className="min-h-screen selection:bg-primary/10 selection:text-primary">
+                    {/* Navbar */}
+                    <nav className="fixed top-0 left-0 right-0 z-50 glass border-b border-gray-100/50 py-4">
+                        <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 bg-primary rounded-2xl flex items-center justify-center shadow-lg shadow-primary/30">
+                                    <i data-lucide="Activity" className="text-white w-6 h-6"></i>
+                                </div>
+                                <span className="text-2xl font-black tracking-tight text-dark uppercase italic">LABOURLINK</span>
+                            </div>
+                            <div className="hidden lg:flex items-center gap-10 text-[14px] font-bold text-gray-500">
+                                <a href="#" className="hover:text-primary transition-colors flex items-center gap-1">Categories <i data-lucide="ChevronDown" className="w-4 h-4"></i></a>
+                                <a href="#" className="hover:text-primary transition-colors">How it Works</a>
+                                <a href="#" className="hover:text-primary transition-colors">Enterprise</a>
+                                <a href="#" className="px-4 py-1 bg-gray-900 text-white rounded-full text-[12px] hover:bg-primary transition-colors">Become a Pro</a>
+                            </div>
+                            <div className="flex items-center gap-4">
+                                <Button variant="ghost" className="hidden sm:flex px-4">Sign In</Button>
+                                <Button className="px-8 shadow-xl">Get Started</Button>
+                            </div>
+                        </div>
+                    </nav>
+
+                    {/* Hero Section */}
+                    <section className="pt-40 pb-20 md:pt-56 md:pb-32 px-6">
+                        <div className="max-w-7xl mx-auto grid md:grid-cols-2 gap-20 items-center">
+                            <motion.div
+                                initial={{ opacity: 0, y: 30 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 0.8, ease: "easeOut" }}
+                            >
+                                <div className="inline-flex items-center gap-3 px-5 py-2.5 bg-primary-light text-primary rounded-full text-[13px] font-bold mb-8 border border-primary/10">
+                                    <span className="flex h-3 w-3">
+                                        <span className="animate-ping absolute inline-flex h-3 w-3 rounded-full bg-primary opacity-75"></span>
+                                        <span className="relative inline-flex rounded-full h-3 w-3 bg-primary"></span>
+                                    </span>
+                                    2,400+ Pros Active Now
+                                </div>
+                                <h1 className="text-6xl md:text-[84px] font-[900] leading-[0.95] mb-8 text-dark tracking-[-0.04em]">
+                                    Home help,<br />
+                                    <span className="text-primary italic">simplified.</span>
+                                </h1>
+                                <p className="text-xl text-gray-500 mb-12 max-w-lg leading-relaxed font-medium">
+                                    Skip the stress. Book premium, vetted professionals for your home maintenance and specialized tasks in under 60 seconds.
+                                </p>
+
+                                {/* Smart Search */}
+                                <div className="p-3 bg-white rounded-[2.5rem] shadow-[0_32px_64px_-16px_rgba(0,0,0,0.1)] border border-gray-100 flex flex-col sm:flex-row gap-3 max-w-2xl mb-8 relative z-10">
+                                    <div className="flex-1 flex items-center px-5 gap-4">
+                                        <i data-lucide="Search" className="text-gray-400 w-6 h-6"></i>
+                                        <input
+                                            type="text"
+                                            placeholder="What service do you need today?"
+                                            className="w-full py-4 outline-none text-dark bg-transparent text-lg font-medium placeholder:text-gray-400"
+                                        />
+                                    </div>
+                                    <Button className="w-full sm:w-auto px-10 h-16 text-lg rounded-[2rem]">Search Now</Button>
+                                </div>
+
+                                <div className="flex flex-wrap gap-3">
+                                    {['Cleaning', 'Electrical', 'Painting', 'Plumbing', 'Demolition'].map(cat => (
+                                        <button key={cat} className="px-5 py-2 bg-white border border-gray-100 hover:border-primary hover:text-primary rounded-full text-[12px] font-black transition-all uppercase tracking-widest shadow-sm">
+                                            {cat}
+                                        </button>
+                                    ))}
+                                </div>
+                            </motion.div>
+
+                            <motion.div
+                                initial={{ opacity: 0, scale: 0.8, rotate: 2 }}
+                                animate={{ opacity: 1, scale: 1, rotate: 0 }}
+                                transition={{ duration: 1, delay: 0.2 }}
+                                className="relative hidden md:block"
+                            >
+                                <div className="absolute -z-10 w-[140%] h-[140%] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-gradient-to-tr from-primary/5 via-primary/10 to-transparent rounded-full blur-[100px]"></div>
+                                <div className="relative z-10 aspect-square rounded-[4rem] overflow-hidden shadow-2xl skew-x-[-2deg]">
+                                    <img src="https://images.unsplash.com/photo-1621905251189-08b45d6a269e?q=80&w=2069&auto=format&fit=crop" alt="Pro Working" className="w-full h-full object-cover scale-110" />
+                                    <div className="absolute inset-0 bg-gradient-to-t from-dark/40 to-transparent"></div>
+                                    <div className="absolute bottom-10 left-10 right-10 p-8 glass rounded-4xl backdrop-blur-3xl border-white/30 text-dark">
+                                        <div className="flex items-center gap-4 mb-3">
+                                            <div className="w-12 h-12 bg-primary rounded-2xl flex items-center justify-center text-white">
+                                                <i data-lucide="CheckCircle2" className="w-7 h-7"></i>
+                                            </div>
+                                            <div className="font-bold text-xl tracking-tight">Vetted & Insured</div>
+                                        </div>
+                                        <p className="text-sm font-medium opacity-80 leading-relaxed italic">"LABOURLINK has changed how I manage my house. Reliable pros every time."</p>
+                                    </div>
+                                </div>
+                            </motion.div>
+                        </div>
+                    </section>
+
+                    {/* Popular Services Grid */}
+                    <section className="py-32 bg-white px-6">
+                        <div className="max-w-7xl mx-auto">
+                            <div className="flex flex-col md:flex-row md:items-end justify-between mb-24 gap-10">
+                                <div>
+                                    <div className="flex items-center gap-3 text-primary font-black uppercase tracking-[0.3em] text-[12px] mb-6">
+                                        <div className="h-[2px] w-12 bg-primary"></div>
+                                        Our Marketplace
+                                    </div>
+                                    <h2 className="text-5xl md:text-7xl font-black mb-6 text-dark tracking-[-0.03em] leading-tight italic">
+                                        Popular <span className="text-primary underline decoration-primary/20 underline-offset-[12px]">services.</span>
+                                    </h2>
+                                    <p className="text-gray-500 text-xl max-w-2xl font-medium leading-relaxed">Choose from our most requested home categories, all handled by background-verified masters of their craft.</p>
+                                </div>
+                                <Button variant="secondary" className="px-10 py-5 rounded-3xl">Explore 50+ More <i data-lucide="LayoutGrid" className="ml-1 w-5 h-5"></i></Button>
+                            </div>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10">
+                                {services.map(s => <ServiceCard key={s.id} service={s} />)}
+                            </div>
+                        </div>
+                    </section>
+
+                    {/* How it Works */}
+                    <section className="py-32 px-6 bg-gray-50 border-y border-gray-100 overflow-hidden">
+                        <div className="max-w-7xl mx-auto text-center relative">
+                            <h2 className="text-5xl md:text-6xl font-black mb-24 tracking-tight"><span className="text-primary italic">Seamless</span> from start to finish.</h2>
+                            <div className="grid grid-cols-1 md:grid-cols-4 gap-16 md:gap-8 relative">
+                                {steps.map((step, i) => (
+                                    <motion.div
+                                        key={i}
+                                        initial={{ opacity: 0, scale: 0.9 }}
+                                        whileInView={{ opacity: 1, scale: 1 }}
+                                        viewport={{ once: true }}
+                                        transition={{ delay: i * 0.1 }}
+                                        className="flex flex-col items-center group relative z-10"
+                                    >
+                                        <div className="w-24 h-24 bg-white rounded-[2.5rem] shadow-2xl flex items-center justify-center mb-10 border border-gray-100 group-hover:bg-primary group-hover:-translate-y-2 transition-all duration-500 group-hover:shadow-primary/30">
+                                            <i data-lucide={step.icon} className="text-primary w-10 h-10 group-hover:text-white transition-colors"></i>
+                                            <div className="absolute -top-3 -right-3 w-10 h-10 bg-dark text-white rounded-2xl flex items-center justify-center font-black text-lg border-4 border-gray-50">
+                                                {i + 1}
+                                            </div>
+                                        </div>
+                                        <h3 className="text-2xl font-black mb-4 tracking-tight">{step.title}</h3>
+                                        <p className="text-gray-500 text-[15px] font-medium max-w-[200px] leading-relaxed italic">{step.desc}</p>
+                                    </motion.div>
+                                ))}
+                                {/* Connection Line Desktop */}
+                                <div className="hidden md:block absolute top-12 left-[15%] right-[15%] h-[3px] bg-gradient-to-r from-transparent via-gray-200 to-transparent -z-0"></div>
+                            </div>
+                        </div>
+                    </section>
+
+                    {/* Why Choose Us & More */}
+                    <section className="py-32 px-6 bg-white overflow-hidden">
+                        <div className="max-w-7xl mx-auto">
+                            <div className="grid md:grid-cols-2 gap-24 items-center">
+                                <motion.div
+                                    initial={{ opacity: 0, x: -50 }}
+                                    whileInView={{ opacity: 1, x: 0 }}
+                                    viewport={{ once: true }}
+                                >
+                                    <div className="text-primary font-black uppercase tracking-[0.3em] text-[12px] mb-6">Built for Trust</div>
+                                    <h2 className="text-5xl md:text-6xl font-[900] mb-10 tracking-tight leading-[1.1]">The quality you <span className="text-primary underline decoration-primary/10 underline-offset-8 italic">deserve.</span></h2>
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-10">
+                                        {features.map((f, i) => (
+                                            <div key={i} className="flex flex-col gap-4 group">
+                                                <div className="w-14 h-14 bg-primary-light rounded-2xl flex items-center justify-center group-hover:bg-primary transition-all duration-300">
+                                                    <i data-lucide={f.icon} className="text-primary w-7 h-7 group-hover:text-white transition-colors"></i>
+                                                </div>
+                                                <h4 className="text-xl font-black tracking-tight">{f.title}</h4>
+                                                <p className="text-gray-500 text-sm leading-relaxed font-medium">{f.desc}</p>
+                                            </div>
+                                        ))}
+                                    </div>
+                                    <Button className="mt-16 px-12 h-16 rounded-3xl text-lg">Read Our Quality Guarantee</Button>
+                                </motion.div>
+                                <motion.div
+                                    initial={{ opacity: 0, x: 50 }}
+                                    whileInView={{ opacity: 1, x: 0 }}
+                                    viewport={{ once: true }}
+                                    className="relative flex justify-center"
+                                >
+                                    <div className="absolute -z-10 w-[120%] h-[120%] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-primary/5 rounded-full blur-[100px]"></div>
+                                    <div className="grid grid-cols-2 gap-6 items-start">
+                                        <div className="space-y-6 pt-12">
+                                            <img src="https://images.unsplash.com/photo-1581578731548-c64695cc6954?auto=format&fit=crop&q=80&w=2070" className="rounded-4xl shadow-xl w-full aspect-[3/4] object-cover" alt="Cleaning" />
+                                            <img src="https://images.unsplash.com/photo-1595844736660-ec916849492d?auto=format&fit=crop&q=80&w=2070" className="rounded-4xl shadow-xl w-full aspect-square object-cover" alt="Plumbing" />
+                                        </div>
+                                        <div className="space-y-6">
+                                            <img src="https://images.unsplash.com/photo-1591955506264-3f5a6834570a?auto=format&fit=crop&q=80&w=2070" className="rounded-4xl shadow-xl w-full aspect-square object-cover" alt="Professional" />
+                                            <img src="https://images.unsplash.com/photo-1521207418485-99c705420785?auto=format&fit=crop&q=80&w=2070" className="rounded-4xl shadow-xl w-full aspect-[3/4] object-cover" alt="Painting" />
+                                        </div>
+                                    </div>
+                                </motion.div>
+                            </div>
+                        </div>
+                    </section>
+
+                    {/* Testimonials */}
+                    <section className="py-32 bg-gray-900 border-y border-white/5 px-6 relative overflow-hidden">
+                        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-20"></div>
+                        <div className="max-w-7xl mx-auto relative z-10">
+                            <div className="text-center mb-24">
+                                <div className="text-primary font-black uppercase tracking-[0.3em] text-[12px] mb-6">Real Reviews</div>
+                                <h2 className="text-5xl md:text-6xl font-black text-white italic tracking-tight underline decoration-primary/30 underline-offset-8">Loved by <br className="sm:hidden" /> thousands.</h2>
+                            </div>
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
+                                {testimonials.map((t, i) => (
+                                    <motion.div
+                                        key={i}
+                                        initial={{ opacity: 0, scale: 0.95 }}
+                                        whileInView={{ opacity: 1, scale: 1 }}
+                                        viewport={{ once: true }}
+                                        className="bg-white/5 backdrop-blur-xl p-10 rounded-[3rem] border border-white/10 relative overflow-hidden group hover:bg-white/10 transition-colors"
+                                    >
+                                        <div className="absolute top-0 right-0 p-8 text-primary opacity-20">
+                                            <i data-lucide="Quote" className="w-16 h-16"></i>
+                                        </div>
+                                        <div className="flex items-center gap-4 mb-8">
+                                            <img src={t.avatar} className="w-14 h-14 rounded-2xl grayscale group-hover:grayscale-0 transition-all shadow-lg" alt={t.name} />
+                                            <div>
+                                                <h4 className="font-black text-white text-lg tracking-tight">{t.name}</h4>
+                                                <p className="text-primary font-bold text-xs uppercase tracking-widest">{t.role}</p>
+                                            </div>
+                                        </div>
+                                        <p className="text-gray-300 text-lg leading-relaxed font-medium italic">"{t.text}"</p>
+                                    </motion.div>
+                                ))}
+                            </div>
+                        </div>
+                    </section>
+
+                    {/* Mobile App CTA */}
+                    <section className="py-32 px-6">
+                        <div className="max-w-7xl mx-auto">
+                            <div className="bg-primary rounded-[4rem] p-10 md:p-24 relative overflow-hidden flex flex-col items-center text-center shadow-[0_48px_100px_-24px_rgba(79,70,229,0.5)]">
+                                <div className="absolute top-0 left-0 w-full h-full bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
+                                <div className="absolute -top-1/2 -left-1/4 w-full h-full bg-white/10 blur-[120px] rounded-full"></div>
+                                <div className="absolute -bottom-1/2 -right-1/4 w-full h-full bg-dark/20 blur-[120px] rounded-full"></div>
+
+                                <div className="relative z-10 w-full max-w-4xl">
+                                    <h2 className="text-5xl md:text-8xl font-black text-white leading-[0.95] mb-10 tracking-[-0.04em] italic uppercase underline decoration-white decoration-4 underline-offset-8">Ready to book <br /> your first pro?</h2>
+                                    <div className="flex flex-col sm:flex-row gap-6 justify-center">
+                                        <Button className="bg-white text-primary hover:bg-gray-100 px-12 h-20 text-xl rounded-4xl">Book Now Instantly</Button>
+                                        <Button className="bg-dark text-white hover:bg-gray-800 px-12 h-20 text-xl rounded-4xl flex items-center gap-4 border-2 border-white/10">
+                                            <i data-lucide="Download" className="w-6 h-6"></i>
+                                            Download App
+                                        </Button>
+                                    </div>
+                                    <p className="mt-12 text-white/70 font-bold text-sm uppercase tracking-widest">Join 5,000+ new users who joined this week</p>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    {/* Footer */}
+                    <footer className="bg-dark text-white pt-32 pb-16 px-6">
+                        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-20 mb-32">
+                            <div className="col-span-1 md:col-span-1">
+                                <div className="flex items-center gap-3 mb-10">
+                                    <div className="w-12 h-12 bg-primary rounded-2xl flex items-center justify-center">
+                                        <i data-lucide="Activity" className="text-white w-7 h-7"></i>
+                                    </div>
+                                    <span className="text-3xl font-black tracking-tight uppercase italic underline decoration-primary decoration-4 underline-offset-4">LABOURLINK</span>
+                                </div>
+                                <p className="text-gray-400 text-lg leading-relaxed mb-10 font-medium">
+                                    Modernizing home maintenance with vetted pros and frictionless technology.
+                                </p>
+                                <div className="flex gap-4">
+                                    {['Twitter', 'Instagram', 'Facebook', 'Linkedin'].map(social => (
+                                        <div key={social} className="w-12 h-12 rounded-2xl border border-white/10 flex items-center justify-center hover:bg-primary hover:border-primary transition-all cursor-pointer">
+                                            <i data-lucide={social} className="w-5 h-5"></i>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                            <div>
+                                <h4 className="font-black mb-10 text-xl tracking-tight text-white italic">Explore <span className="text-primary prose">Services</span></h4>
+                                <ul className="space-y-6 text-gray-400 font-bold text-sm uppercase tracking-widest">
+                                    <li><a href="#" className="hover:text-primary transition-colors">Cleaning & Repair</a></li>
+                                    <li><a href="#" className="hover:text-primary transition-colors">Plumbing & Electrical</a></li>
+                                    <li><a href="#" className="hover:text-primary transition-colors">Specialized Pro</a></li>
+                                    <li><a href="#" className="hover:text-primary transition-colors">All Categories</a></li>
+                                </ul>
+                            </div>
+                            <div>
+                                <h4 className="font-black mb-10 text-xl tracking-tight text-white italic">Company <span className="text-primary prose">Info</span></h4>
+                                <ul className="space-y-6 text-gray-400 font-bold text-sm uppercase tracking-widest">
+                                    <li><a href="#" className="hover:text-primary transition-colors">Our Mission</a></li>
+                                    <li><a href="#" className="hover:text-primary transition-colors">Help Center</a></li>
+                                    <li><a href="#" className="hover:text-primary transition-colors">Trust & Safety</a></li>
+                                    <li><a href="#" className="hover:text-primary transition-colors">Privacy Policy</a></li>
+                                </ul>
+                            </div>
+                            <div>
+                                <h4 className="font-black mb-10 text-xl tracking-tight text-white italic">Get in <span className="text-primary prose">Touch</span></h4>
+                                <div className="space-y-6 text-gray-400">
+                                    <div className="flex items-center gap-4 group cursor-pointer">
+                                        <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center group-hover:bg-primary transition-colors">
+                                            <i data-lucide="Mail" className="w-5 h-5 group-hover:text-white"></i>
+                                        </div>
+                                        <span className="font-bold">hello@LABOURLINK.com</span>
+                                    </div>
+                                    <div className="flex items-center gap-4 group cursor-pointer">
+                                        <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center group-hover:bg-primary transition-colors">
+                                            <i data-lucide="Phone" className="w-5 h-5 group-hover:text-white"></i>
+                                        </div>
+                                        <span className="font-bold">+91 000 000 0000</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="max-w-7xl mx-auto pt-16 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-8">
+                            <p className="text-gray-500 font-bold text-sm uppercase tracking-widest italic">© 2026 LABOURLINK Inc. Designed for the Future.</p>
+                            <div className="flex gap-10 text-gray-400 text-xs font-black uppercase tracking-widest">
+                                <a href="#" className="hover:text-primary transition-colors">Terms</a>
+                                <a href="#" className="hover:text-primary transition-colors">Privacy</a>
+                                <a href="#" className="hover:text-primary transition-colors">Contact</a>
+                            </div>
+                        </div>
+                    </footer>
+                    <div className="fixed bottom-4 right-4 bg-primary text-white text-[10px] px-2 py-1 rounded-md opacity-50 z-[100]">v4.0.1 (Stable)</div>
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+
+        // Re-run Lucide on any DOM change for dynamic icons
+        const observer = new MutationObserver(() => lucide.createIcons());
+        observer.observe(document.getElementById('root'), { childList: true, subtree: true });
+    </script>
+    {% endverbatim %}
+</body>
+
+</html>

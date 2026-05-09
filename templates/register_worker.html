@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Join LABOURLINK | Skilled Professional Registration{% endblock %}
+
+{% block chatbot %}{% endblock %}
+
+{% block extra_css %}
+<style>
+  .reg-hero {
+    background: linear-gradient(135deg, #0A1123 0%, #3A3E6C 100%);
+    color: #DEDCDC;
+    padding: 60px 24px;
+    text-align: center;
+    border-radius: 0 0 40px 40px;
+  }
+
+  .form-card {
+    max-width: 600px;
+    margin: -40px auto 60px;
+    background: #8387C3;
+    padding: 40px;
+    border-radius: 24px;
+    box-shadow: 0 20px 40px rgba(25, 29, 35, 0.1);
+    border: 1px solid #3A3E6C;
+  }
+
+  .form-group {
+    margin-bottom: 20px;
+  }
+
+  .form-group label {
+    display: block;
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: #0A1123;
+  }
+
+  input,
+  select {
+    width: 100%;
+    padding: 14px;
+    border-radius: 12px;
+    border: 2px solid #3A3E6C;
+    font-size: 15px;
+    transition: all 0.3s;
+    outline: none;
+    background: #DEDCDC;
+  }
+
+  input:focus,
+  select:focus {
+    border-color: #0A1123;
+    background: white;
+    box-shadow: 0 0 0 4px rgba(86, 84, 73, 0.1);
+  }
+
+  .btn-submit {
+    width: 100%;
+    padding: 16px;
+    background: #3A3E6C;
+    color: #DEDCDC;
+    border: none;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+
+  .btn-submit:hover {
+    background: #0A1123;
+    transform: translateY(-2px);
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="reg-hero">
+  <h1 style="margin:0; font-size:32px;">Join the Network</h1>
+  <p style="opacity:0.8; margin-top:10px;">Connect with local customers and grow your professional profile.</p>
+</div>
+
+<div class="form-card">
+  <form method="post">
+    {% csrf_token %}
+
+    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px;">
+      <div class="form-group">
+        <label>Username</label>
+        <input name="username" placeholder="Pick a username" required>
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" name="password" placeholder="••••••••" required>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Your Primary Service</label>
+      <select name="service" required>
+        <option value="">Select your expertise</option>
+        {% for s in services %}
+        <option value="{{ s.id }}">{{ s.name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px;">
+      <div class="form-group">
+        <label>Phone Number</label>
+        <input type="tel" name="phone" maxlength="10" pattern="\d{10}" oninput="this.value = this.value.replace(/[^0-9]/g, '');" placeholder="How users reach you" required>
+      </div>
+      <div class="form-group">
+        <label>Service Area/Hub</label>
+        <input name="area" placeholder="e.g. Adyar, Chennai" required>
+      </div>
+    </div>
+
+    <button type="submit" class="btn-submit">Register as Worker</button>
+
+    <p style="font-size:12px; color:#94a3b8; text-align:center; margin-top:20px;">
+      Registration confirms you agree to our professional service standards.
+    </p>
+  </form>
+</div>
+{% endblock %}
+
+
+
+
+
+

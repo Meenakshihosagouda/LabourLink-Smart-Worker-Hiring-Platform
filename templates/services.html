@@ -1,0 +1,438 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Our Services | LABOURLINK{% endblock %}
+
+{% block extra_css %}
+<style>
+  :root {
+    --primary-blue: var(--primary);
+    --dark-blue: var(--dark);
+    --navy-black: var(--dark);
+    --slate-light: var(--off-white);
+    --slate-gray: var(--accent);
+  }
+
+  body {
+    background: #0A1123;
+  }
+
+  /* Animations */
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .animate-fade-in {
+    animation: fadeInUp 0.6s ease-out forwards;
+  }
+
+  /* Hero Section */
+  .services-hero {
+    background: linear-gradient(135deg, var(--dark) 0%, var(--primary) 100%);
+    color: white;
+    padding: 80px 24px 100px;
+    text-align: center;
+    border-radius: 0 0 40px 40px;
+    margin-bottom: 60px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .services-hero::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -20%;
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(circle, rgba(37, 99, 235, 0.1) 0%, transparent 70%);
+    border-radius: 50%;
+  }
+
+  .services-hero h1 {
+    font-size: clamp(32px, 5vw, 48px);
+    font-weight: 800;
+    margin-bottom: 16px;
+    background: linear-gradient(to right, #fff, #94a3b8);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .services-hero p {
+    font-size: 18px;
+    color: #94a3b8;
+    max-width: 600px;
+    margin: 0 auto;
+  }
+
+  /* Services Grid */
+  .services-container {
+    max-width: 1200px;
+    margin: -60px auto 80px;
+    padding: 0 24px;
+    position: relative;
+    z-index: 10;
+  }
+
+  .services-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 30px;
+  }
+
+  /* Service Card */
+  .service-card {
+    background: white;
+    border-radius: 20px;
+    padding: 0;
+    box-shadow: 0 10px 30px -10px rgba(10, 17, 35, 0.15);
+    border: 1px solid var(--accent);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    position: relative;
+    overflow: hidden;
+    animation-delay: calc(var(--delay, 0) * 100ms);
+  }
+
+  .service-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 20px 40px -12px rgba(37, 99, 235, 0.15);
+    border-color: #bfdbfe;
+  }
+
+  /* Service image banner */
+  .card-image {
+    width: 100%;
+    height: 180px;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.5s ease;
+  }
+
+  .service-card:hover .card-image {
+    transform: scale(1.05);
+  }
+
+  .card-body {
+    padding: 24px 28px;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    text-align: center;
+    align-items: center;
+  }
+
+  .card-icon-wrapper {
+    width: 50px;
+    height: 50px;
+    background: #eff6ff;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    margin-bottom: 16px;
+    color: var(--primary-blue);
+    transition: transform 0.3s ease;
+  }
+
+  .service-card:hover .card-icon-wrapper {
+    transform: scale(1.1) rotate(5deg);
+    background: var(--primary-blue);
+    color: white;
+  }
+
+  .service-card h3 {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--navy-black);
+    margin-bottom: 12px;
+  }
+
+  .service-card p {
+    font-size: 15px;
+    color: var(--slate-gray);
+    margin-bottom: 24px;
+    line-height: 1.6;
+    flex-grow: 1;
+  }
+
+  .stats-row {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 24px;
+    padding-top: 20px;
+    border-top: 1px solid #f1f5f9;
+    justify-content: center;
+    width: 100%;
+  }
+
+  .stat-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: var(--slate-gray);
+    font-weight: 500;
+  }
+
+  .stat-item span {
+    font-weight: 700;
+    color: var(--navy-black);
+  }
+
+  .btn-explore {
+    display: block;
+    width: 100%;
+    padding: 14px;
+    background: var(--slate-light);
+    color: var(--navy-black);
+    text-align: center;
+    border-radius: 12px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.2s ease;
+  }
+
+  .service-card:hover .btn-explore {
+    background: var(--primary-blue);
+    color: white;
+  }
+
+  /* Empty State */
+  .empty-state {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 60px;
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  }
+
+  /* Responsive Adjustments */
+  @media (max-width: 768px) {
+    .services-hero {
+      padding: 60px 20px 80px;
+      border-radius: 0 0 30px 30px;
+    }
+
+    .services-container {
+      margin-top: -40px;
+    }
+  }
+
+  /* Modal Styling */
+  .modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(15, 23, 42, 0.6);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+  }
+
+  .modal-overlay.active {
+    opacity: 1;
+    pointer-events: all;
+  }
+
+  .selection-modal {
+    background: white;
+    padding: 30px;
+    border-radius: 24px;
+    width: 90%;
+    max-width: 500px;
+    text-align: center;
+    transform: translateY(20px);
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+
+  .modal-overlay.active .selection-modal {
+    transform: translateY(0);
+  }
+
+  .modal-title {
+    font-size: 24px;
+    font-weight: 800;
+    color: var(--navy-black);
+    margin-bottom: 10px;
+  }
+
+  .modal-desc {
+    color: var(--slate-gray);
+    margin-bottom: 30px;
+    font-size: 15px;
+  }
+
+  .selection-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+
+  .selection-card {
+    border: 2px solid #f1f5f9;
+    padding: 20px;
+    border-radius: 16px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-decoration: none;
+    color: inherit;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .selection-card:hover {
+    border-color: var(--primary-blue);
+    background: #eff6ff;
+  }
+
+  .selection-icon {
+    font-size: 32px;
+    margin-bottom: 12px;
+  }
+
+  .selection-label {
+    font-weight: 700;
+    color: var(--navy-black);
+    font-size: 14px;
+  }
+
+  .close-modal {
+    margin-top: 24px;
+    background: none;
+    border: none;
+    color: #94a3b8;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 14px;
+  }
+
+  .close-modal:hover {
+    color: var(--navy-black);
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- Hero Section -->
+<div class="services-hero animate-fade-in">
+  <h1>Explore Services</h1>
+  <p>Find the perfect professional for your needs. Connect with skilled workers and verified contractors in your area.
+  </p>
+</div>
+
+<!-- Services Grid -->
+<div class="services-container">
+  <div class="services-grid">
+    {% for item in data %}
+    <div class="service-card animate-fade-in" style="--delay: {{ forloop.counter }};">
+      <!-- Service Image -->
+      <img class="card-image"
+        src="{% if 'Electric' in item.service.name %}https://images.unsplash.com/photo-1621905251189-08b45d6a269e?auto=format&fit=crop&q=80&w=600{% elif 'Plumb' in item.service.name %}{% static 'images/plumber.png' %}{% elif 'Carp' in item.service.name %}{% static 'images/carpenter.png' %}{% elif 'Bouncer' in item.service.name or 'bouncer' in item.service.name or 'Security Guard' in item.service.name %}{% static 'images/bouncer.png' %}{% elif 'Bike Wash' in item.service.name %}{% static 'images/bike_wash.png' %}{% elif 'Help' in item.service.name or 'Household' in item.service.name %}{% static 'images/household_helper.png' %}{% elif 'Tank' in item.service.name %}{% static 'images/water_tank.png' %}{% elif 'Organiz' in item.service.name or 'Organizer' in item.service.name %}{% static 'images/home_organizer.png' %}{% elif 'Garden' in item.service.name or 'garden' in item.service.name %}{% static 'images/gardener.png' %}{% elif 'Pest' in item.service.name %}{% static 'images/pest_control.png' %}{% elif 'Paint' in item.service.name %}https://images.unsplash.com/photo-1562259949-e8e7689d7828?auto=format&fit=crop&q=80&w=600{% elif 'Tile' in item.service.name or 'tile' in item.service.name %}https://images.unsplash.com/photo-1600585152220-90363fe7e115?auto=format&fit=crop&q=80&w=600{% elif 'Demol' in item.service.name %}https://images.unsplash.com/photo-1504307651254-35680f356dfd?auto=format&fit=crop&q=80&w=600{% elif 'Clean' in item.service.name %}https://images.unsplash.com/photo-1581578731548-c64695cc6952?auto=format&fit=crop&q=80&w=600{% elif 'Weld' in item.service.name %}https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?auto=format&fit=crop&q=80&w=600{% elif 'Waterproof' in item.service.name or 'WP' in item.service.icon %}https://images.unsplash.com/photo-1584622650111-993a426fbf0a?auto=format&fit=crop&q=80&w=600{% elif 'Event' in item.service.name or 'Decor' in item.service.name %}https://images.unsplash.com/photo-1464366400600-7168b8af9bc3?auto=format&fit=crop&q=80&w=600{% elif 'Mason' in item.service.name %}https://images.unsplash.com/photo-1590527735337-5e6b7c1e1c9b?auto=format&fit=crop&q=80&w=600{% elif 'Pack' in item.service.name or 'Mover' in item.service.name %}https://images.unsplash.com/photo-1600518464441-9154a4dea21b?auto=format&fit=crop&q=80&w=600{% elif 'Warehouse' in item.service.name %}https://images.unsplash.com/photo-1553413077-190dd305871c?auto=format&fit=crop&q=80&w=600{% elif 'Load' in item.service.name or 'Unload' in item.service.name %}https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?auto=format&fit=crop&q=80&w=600{% elif 'Roof' in item.service.name %}https://images.unsplash.com/photo-1632759145351-1d592919f522?auto=format&fit=crop&q=80&w=600{% elif 'AC' in item.service.name or 'Air Con' in item.service.name or 'HVAC' in item.service.name %}https://images.unsplash.com/photo-1631545806609-67eff42a5b85?auto=format&fit=crop&q=80&w=600{% elif 'Security' in item.service.name or 'CCTV' in item.service.name %}https://images.unsplash.com/photo-1558002038-1055907df827?auto=format&fit=crop&q=80&w=600{% elif 'Stage' in item.service.name %}https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&q=80&w=600{% elif 'Light' in item.service.name %}https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&q=80&w=600{% elif 'Drive' in item.service.name or 'Driver' in item.service.name %}https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?auto=format&fit=crop&q=80&w=600{% elif 'Car Wash' in item.service.name %}https://images.unsplash.com/photo-1520340356584-f9917d1eea6f?auto=format&fit=crop&q=80&w=600{% elif 'Cook' in item.service.name %}https://images.unsplash.com/photo-1577219491135-ce391730fb2c?auto=format&fit=crop&q=80&w=600{% else %}https://images.unsplash.com/photo-1503387762-592deb58ef4e?auto=format&fit=crop&q=80&w=600{% endif %}"
+        alt="{{ item.service.name }}">
+
+      <div class="card-body">
+        <h3>{{ item.service.name }}</h3>
+        <p>{{ item.service.desc|truncatechars:100 }}</p>
+
+        <div class="stats-row">
+          <div class="stat-item" title="Available Workers">
+            <span>{{ item.workers }}</span> Workers
+          </div>
+          <div class="stat-item" title="Active Contractors">
+            <span>{{ item.contractors }}</span> Teams
+          </div>
+        </div>
+
+        {% if user.is_authenticated %}
+        <button onclick="openSelectionModal('{{ item.service.name }}', '{{ item.service.slug }}')" class="btn-explore"
+          style="border:none; cursor:pointer;">
+          View Professionals
+        </button>
+        {% else %}
+        <a href="{% url 'login' %}?next={{ request.path }}" class="btn-explore">
+          Sign in to continue
+        </a>
+        {% endif %}
+      </div>
+    </div>
+    {% empty %}
+    <div class="empty-state animate-fade-in">
+      <div style="font-size: 48px; margin-bottom: 20px;"></div>
+      <h3>No services available yet</h3>
+      <p style="color: #64748b;">Check back soon as we expand our service offerings.</p>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<!-- Selection Modal -->
+<div class="modal-overlay" id="selectionModal">
+  <div class="selection-modal">
+    <h3 class="modal-title">Select Hiring Mode</h3>
+    <p class="modal-desc">How would you like to hire for <span id="serviceName"
+        style="color:var(--primary-blue); font-weight:700;">Service</span>?</p>
+
+    <div class="selection-grid">
+      <a href="#" id="individualLink" class="selection-card">
+        <div class="selection-icon"><i class="fas fa-user"></i></div>
+        <div class="selection-label">Individual Worker</div>
+      </a>
+
+      <a href="#" id="bulkLink" class="selection-card">
+        <div class="selection-icon"><i class="fas fa-users"></i></div>
+        <div class="selection-label">Bulk Hire Team</div>
+      </a>
+    </div>
+
+    <button class="close-modal" onclick="closeModal()">Cancel</button>
+  </div>
+</div>
+
+<script>
+  function openSelectionModal(serviceName, slug) {
+    document.getElementById('serviceName').textContent = serviceName;
+    document.getElementById('individualLink').href = `/service/${slug}/`;
+    document.getElementById('bulkLink').href = `/bulk-hire/?service=${slug}`;
+
+    document.getElementById('selectionModal').classList.add('active');
+  }
+
+  function closeModal() {
+    document.getElementById('selectionModal').classList.remove('active');
+  }
+
+  // Close on click outside
+  document.getElementById('selectionModal').addEventListener('click', function (e) {
+    if (e.target === this) {
+      closeModal();
+    }
+  });
+</script>
+{% endblock %}

@@ -1,0 +1,863 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>{% block title %}LABOURLINK{% endblock %}</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!-- OpenStreetMap Leaflet -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+  <style>
+    :root {
+      --primary: #3A3E6C;
+      --secondary: #8387C3;
+      --accent: #959BB5;
+      --text: #0A1123;
+      --bg: #DEDCDC;
+      --dark: #0A1123;
+      --midnight: #0A1123;
+      --american-blue: #3A3E6C;
+      --ube: #8387C3;
+      --cadet-grey: #959BB5;
+      --off-white: #DEDCDC;
+    }
+
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: Inter, system-ui, Arial, sans-serif
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    main {
+      flex: 1;
+    }
+
+    a {
+      text-decoration: none;
+      color: inherit
+    }
+
+    /* HEADER */
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background: var(--dark);
+      color: var(--off-white);
+      padding: 24px 48px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 4px 12px rgba(10, 17, 35, 0.3);
+      transition: all 0.4s ease;
+    }
+
+    header.transparent {
+      background: transparent;
+      box-shadow: none;
+      position: absolute;
+      width: 100%;
+    }
+
+    .logo {
+      font-size: 26px;
+      font-weight: 200;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    .logo b {
+      font-weight: 800;
+    }
+
+    nav {
+      display: flex;
+      gap: 32px;
+      align-items: center;
+    }
+
+    nav a {
+      opacity: .8;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    nav a:hover {
+      opacity: 1;
+      color: var(--secondary);
+    }
+
+    /* Header Search */
+    .header-search {
+      display: flex;
+      align-items: center;
+      background: rgba(255, 255, 255, 0.12);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 6px 16px;
+      border-radius: 99px;
+      margin: 0 auto;
+      /* Center search bar */
+      flex: 1;
+      max-width: 320px;
+      transition: all 0.3s ease;
+    }
+
+    .header-search:focus-within {
+      background: rgba(255, 255, 255, 0.15);
+      border-color: rgba(255, 255, 255, 0.3);
+    }
+
+    .header-search input {
+      background: transparent !important;
+      border: none;
+      outline: none;
+      color: white;
+      font-size: 13px;
+      padding: 4px 8px;
+      width: 100%;
+    }
+
+    .header-search input.search-error::placeholder {
+      color: #ff4d4d !important;
+      font-weight: 700;
+    }
+
+    /* Target browser autofill background */
+    .header-search input:-webkit-autofill,
+    .header-search input:-webkit-autofill:hover,
+    .header-search input:-webkit-autofill:focus {
+      -webkit-text-fill-color: white;
+      -webkit-box-shadow: 0 0 0px 1000px transparent inset;
+      transition: background-color 5000s ease-in-out 0s;
+    }
+
+    .header-search button {
+      background: transparent;
+      border: none;
+      color: white;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      opacity: 0.6;
+    }
+
+    .header-search button:hover {
+      opacity: 1;
+    }
+
+    .cta {
+      background: var(--primary);
+      color: var(--off-white);
+      border: none;
+      padding: 10px 14px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: 700;
+      transition: all 0.3s;
+    }
+
+    .cta:hover {
+      background: var(--secondary);
+      transform: translateY(-1px);
+    }
+
+    /* MESSAGES */
+    .messages {
+      max-width: 1100px;
+      margin: 12px auto;
+      padding: 0 16px;
+    }
+
+    .message {
+      padding: 12px 14px;
+      border-radius: 10px;
+      margin-bottom: 10px;
+      font-size: 14px;
+    }
+
+    .success {
+      background: #DCFCE7;
+      color: #166534
+    }
+
+    .error {
+      background: #FEE2E2;
+      color: #991B1B
+    }
+
+    /* FOOTER */
+    footer {
+      padding: 40px 24px;
+      background: var(--dark);
+      color: var(--off-white);
+      text-align: center;
+      margin-top: 60px;
+      font-size: 13px;
+      letter-spacing: 0.5px;
+      opacity: 0.9;
+    }
+
+    /* FOOTER STATS */
+    .footer-stats {
+      display: flex;
+      justify-content: center;
+      gap: 40px;
+      padding: 30px 24px;
+      background: rgba(58, 62, 108, 0.05);
+      border-top: 1px solid rgba(0, 0, 0, 0.05);
+      text-align: center;
+    }
+
+    .footer-stat-item b {
+      display: block;
+      font-size: 20px;
+      color: var(--primary);
+    }
+
+    .footer-stat-item span {
+      font-size: 11px;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      font-weight: 700;
+    }
+
+    @media (max-width: 768px) {
+      .footer-stats {
+        flex-wrap: wrap;
+        gap: 20px;
+      }
+    }
+
+    /* GLOBAL LOADER (5th Style) */
+    #global-loader-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(10, 17, 35, 0.4);
+      z-index: 9999;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      transition: opacity 0.3s ease;
+    }
+
+    .loader-dots {
+      width: 60px;
+      height: 60px;
+      position: relative;
+      animation: rotate-loader 2s linear infinite;
+    }
+
+    .loader-dots div {
+      position: absolute;
+      width: 12px;
+      height: 12px;
+      background: var(--primary);
+      border-radius: 50%;
+      animation: dots-pulse 1.2s ease-in-out infinite;
+    }
+
+    .loader-dots div:nth-child(1) {
+      top: 0;
+      left: 24px;
+      animation-delay: 0s;
+    }
+
+    .loader-dots div:nth-child(2) {
+      top: 24px;
+      right: 0;
+      animation-delay: -0.3s;
+    }
+
+    .loader-dots div:nth-child(3) {
+      bottom: 0;
+      left: 24px;
+      animation-delay: -0.6s;
+    }
+
+    .loader-dots div:nth-child(4) {
+      top: 24px;
+      left: 0;
+      animation-delay: -0.9s;
+    }
+
+    @keyframes rotate-loader {
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+
+    @keyframes dots-pulse {
+
+      0%,
+      100% {
+        transform: scale(1);
+        opacity: 1;
+      }
+
+      50% {
+        transform: scale(0.4);
+        opacity: 0.5;
+      }
+    }
+  </style>
+
+  {% block extra_css %}{% endblock %}
+</head>
+
+<body>
+  <!-- LOADING OVERLAY -->
+  <div id="global-loader-overlay">
+    <div class="loader-dots">
+      <div></div>
+      <div></div>
+      <div></div>
+      <div></div>
+    </div>
+  </div>
+
+  {% block header %}
+  <!-- ================= HEADER ================= -->
+  <header id="main-header" class="{% if request.path == '/' %}transparent{% endif %}">
+    <div class="logo">LABOUR<b>LINK</b></div>
+
+    {% if request.path == '/' %}
+    <!-- Minimalist Search for Home Page -->
+    <form method="get" action="{% url 'search' %}" class="header-search">
+      <input name="q" placeholder="Search experts..." required>
+      <button type="submit">
+        <svg style="width:16px; height:16px; fill:currentColor" viewBox="0 0 24 24">
+          <path
+            d="M15.5,14H14.71L14.43,13.72C15.41,12.59 16,11.11 16,9.5A6.5,6.5 0 0,0 9.5,3A6.5,6.5 0 0,0 9.5,16C11.11,16 12.59,15.41 13.72,14.43L14,14.71V15.5L19,20.5L20.5,19L15.5,14M9.5,14C7,14 5,12 5,9.5C5,7 7,5 9.5,5C12,5 14,7 14,9.5C14,12 12,14 9.5,14Z" />
+        </svg>
+      </button>
+    </form>
+    {% endif %}
+
+    <nav>
+      <a href="{% if user.worker %}{% url 'worker_home' %}{% else %}{% url 'home' %}{% endif %}">Home</a>
+
+      <!-- SERVICES (Visible to Guests and Customers) -->
+      {% if not user.is_authenticated or not user.worker and not user.contractorprofile %}
+      <a href="{% url 'services' %}">Services</a>
+      {% endif %}
+
+      {% if user.is_authenticated %}
+      <!-- NORMAL USER -->
+      {% if not user.worker and not user.contractorprofile %}
+      <a href="{% url 'my_hires' %}">My Bookings</a>
+      {% endif %}
+
+      <!-- WORKER -->
+      {% if user.worker %}
+      <a href="{% url 'worker_dashboard' %}">Worker Dashboard</a>
+      {% endif %}
+
+      {% if user.contractorprofile %}
+      <a href="{% url 'contractor_dashboard' %}">Contractor Dashboard</a>
+      {% endif %}
+
+      <a href="{% url 'edit_profile' %}">Edit Profile</a>
+      <a href="{% url 'logout' %}">Logout</a>
+
+      {% else %}
+      <a href="{% url 'login' %}">Login</a>
+      {% endif %}
+
+    </nav>
+  </header>
+  {% endblock %}
+
+  <main>
+    <!-- ================= MESSAGES ================= -->
+    {% if messages %}
+    <div class="messages">
+      {% for message in messages %}
+      <div class="message {{ message.tags }}">{{ message }}</div>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- ================= PAGE CONTENT ================= -->
+    {% block content %}
+    {% endblock %}
+  </main>
+
+  {% block footer %}
+  <div class="footer-stats">
+    <div class="footer-stat-item"><b>{{ workers_count|default:"5k+" }}</b><span>Professionals</span></div>
+    <div class="footer-stat-item"><b>{{ services_count|default:"20+" }}</b><span>Service Types</span></div>
+    <div class="footer-stat-item"><b>4.8/5</b><span>User Rating</span></div>
+  </div>
+  <!-- ================= FOOTER ================= -->
+  <footer>
+    &copy; 2026 LABOURLINK &bull; Simple &bull; Local &bull; Reliable
+  </footer>
+  {% endblock %}
+
+  <!-- ================= CHATBOT REFINED V3 ================= -->
+  <style>
+    #chatbot-toggle-wrapper {
+      position: fixed;
+      bottom: 25px;
+      right: 25px;
+      z-index: 1000;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 10px;
+    }
+
+    #chatbot-hint {
+      background: rgba(10, 17, 35, 0.8);
+      color: white;
+      padding: 6px 12px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 500;
+      opacity: 0;
+      transform: translateY(10px);
+      transition: all 0.3s ease;
+      pointer-events: none;
+      backdrop-filter: blur(5px);
+    }
+
+    #chatbot-toggle-wrapper:hover #chatbot-hint {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    #chatbot-toggle {
+      width: 60px;
+      height: 60px;
+      background: rgba(58, 62, 108, 0.9);
+      backdrop-filter: blur(10px);
+      color: white;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    }
+
+    #chatbot-toggle:hover {
+      transform: scale(1.1);
+      background: var(--primary);
+    }
+
+    #chatbot-toggle svg {
+      width: 32px;
+      height: 32px;
+      fill: white;
+    }
+
+    #chatbot-container {
+      position: fixed;
+      bottom: 100px;
+      right: 25px;
+      width: 300px;
+      height: 400px;
+      /* Transparent & Blur Background */
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(25px);
+      -webkit-backdrop-filter: blur(25px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 24px;
+      display: none;
+      flex-direction: column;
+      overflow: hidden;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
+      z-index: 1001;
+      transform-origin: bottom right;
+      transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1);
+    }
+
+    #chatbot-container.closing {
+      transform: scale(0.8) translateY(20px);
+      opacity: 0;
+    }
+
+    #chatbot-header {
+      padding: 16px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    #chatbot-header h4 {
+      margin: 0;
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--primary);
+      letter-spacing: -0.2px;
+    }
+
+    #chatbot-close {
+      background: rgba(255, 77, 77, 0.2);
+      border: none;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      color: #ff4d4d;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      transition: 0.3s;
+    }
+
+    #chatbot-close:hover {
+      background: rgba(255, 77, 77, 0.8);
+      color: white;
+    }
+
+    #chatbot-messages {
+      flex: 1;
+      padding: 10px 20px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      /* Remove scrolling line */
+      scrollbar-width: none;
+      /* Firefox */
+      -ms-overflow-style: none;
+      /* IE/Edge */
+    }
+
+    /* Remove scrolling line for Chrome/Safari/Webkit */
+    #chatbot-messages::-webkit-scrollbar {
+      display: none;
+    }
+
+    .chat-msg {
+      max-width: 90%;
+      padding: 10px 15px;
+      border-radius: 18px;
+      font-size: 14px;
+      line-height: 1.5;
+      position: relative;
+    }
+
+    .user-msg {
+      align-self: flex-end;
+      background: var(--primary);
+      color: white;
+      border-bottom-right-radius: 4px;
+    }
+
+    .bot-msg {
+      align-self: flex-start;
+      background: rgba(255, 255, 255, 0.2);
+      color: var(--dark);
+      border-bottom-left-radius: 4px;
+    }
+
+    /* Text Animation */
+    .typing-text {
+      display: inline-block;
+      overflow: hidden;
+      white-space: pre-wrap;
+    }
+
+    #chatbot-input-area {
+      padding: 20px;
+      display: flex;
+      gap: 12px;
+      background: transparent;
+    }
+
+    #chatbot-input {
+      flex: 1;
+      border: 1px solid rgba(0, 0, 0, 0.1);
+      background: rgba(255, 255, 255, 0.3);
+      padding: 10px 15px;
+      border-radius: 15px;
+      font-size: 14px;
+      outline: none;
+      transition: all 0.3s;
+    }
+
+    #chatbot-input:focus {
+      border-color: var(--primary);
+      background: rgba(255, 255, 255, 0.5);
+    }
+
+    #chatbot-send {
+      background: var(--primary);
+      border: none;
+      color: white;
+      width: 40px;
+      height: 40px;
+      border-radius: 15px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: 0.3s;
+      box-shadow: 0 4px 12px rgba(58, 62, 108, 0.3);
+    }
+
+    #chatbot-send:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 15px rgba(58, 62, 108, 0.4);
+    }
+  </style>
+
+  {% block chatbot %}
+  {% if not user.worker and not user.contractorprofile %}
+  <div id="chatbot-toggle-wrapper">
+    <div id="chatbot-hint">Need help?</div>
+    <div id="chatbot-toggle">
+      <svg viewBox="0 0 24 24">
+        <path
+          d="M12,2A10,10 0 0,0 2,12C2,13.88 2.5,15.65 3.42,17.16L2.04,21.32C1.96,21.56 2,21.83 2.18,22.03C2.36,22.23 2.62,22.33 2.88,22.3L7.15,21.53C8.61,22.45 10.3,23 12,23A10,10 0 1,0 12,2M12,4A8,8 0 0,1 20,12A8,8 0 0,1 12,20C10.6,20 9.2,19.6 8,18.9L7.6,18.7L4,19.3L4.6,15.7L4.4,15.3C3.5,14 3,12.5 3,11A8,8 0 0,1 11,3A8,8 0 0,1 12,4M12,7A3,3 0 0,0 9,10A3,3 0 0,0 12,13A3,3 0 0,0 15,10A3,3 0 0,0 12,7M7,14V16H17V14H7Z" />
+      </svg>
+    </div>
+  </div>
+
+  <div id="chatbot-container">
+    <div id="chatbot-header">
+      <h4>LABOURLINK Chatbot</h4>
+      <button id="chatbot-close">✕</button>
+    </div>
+    <div id="chatbot-messages">
+      <div class="chat-msg bot-msg"><span class="typing-text">Hello! How can I help you?</span></div>
+    </div>
+    <div id="chatbot-input-area">
+      <input type="text" id="chatbot-input" placeholder="Type here..." autocomplete="off">
+      <button id="chatbot-send">
+        <svg style="width:20px;height:20px;fill:white" viewBox="0 0 24 24">
+          <path d="M2.01,21L23,12L2.01,3L2,10L17,12L2,14L2.01,21Z" />
+        </svg>
+      </button>
+    </div>
+  </div>
+  {% endif %}
+  {% endblock %}
+
+  <script>
+    const wrapper = document.getElementById('chatbot-toggle-wrapper');
+    const container = document.getElementById('chatbot-container');
+    const closeBtn = document.getElementById('chatbot-close');
+    const input = document.getElementById('chatbot-input');
+    const sendBtn = document.getElementById('chatbot-send');
+    const messagesDiv = document.getElementById('chatbot-messages');
+
+    async function sendMessage() {
+      if (!input || !input.value.trim()) return;
+      const msg = input.value.trim();
+
+      appendMessage(msg, 'user');
+      input.value = '';
+
+      try {
+        const response = await fetch('/chatbot/', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken')
+          },
+          body: JSON.stringify({ message: msg })
+        });
+        const data = await response.json();
+        if (data.reply) {
+          setTimeout(() => appendMessage(data.reply, 'bot', true), 600);
+        }
+      } catch (err) {
+        appendMessage("Service unavailable.", 'bot');
+      }
+    }
+
+    if (wrapper) {
+      document.getElementById('chatbot-toggle').addEventListener('click', () => {
+        container.style.display = 'flex';
+        wrapper.style.display = 'none';
+        input.focus();
+      });
+
+      closeBtn.addEventListener('click', () => {
+        container.classList.add('closing');
+        setTimeout(() => {
+          container.style.display = 'none';
+          container.classList.remove('closing');
+          wrapper.style.display = 'flex';
+        }, 500);
+      });
+
+      sendBtn.addEventListener('click', sendMessage);
+      input.addEventListener('keypress', (e) => { if (e.key === 'Enter') sendMessage(); });
+    }
+
+    function appendMessage(text, sender, animate = false) {
+      if (!messagesDiv) return;
+      const msgDiv = document.createElement('div');
+      msgDiv.className = `chat-msg ${sender}-msg`;
+
+      if (animate && sender === 'bot') {
+        const span = document.createElement('span');
+        span.className = 'typing-text';
+        msgDiv.appendChild(span);
+        messagesDiv.appendChild(msgDiv);
+        typeWriter(span, text);
+      } else {
+        msgDiv.textContent = text;
+        messagesDiv.appendChild(msgDiv);
+      }
+
+      messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    }
+
+    function typeWriter(element, text, i = 0) {
+      if (i < text.length) {
+        element.textContent += text.charAt(i);
+        messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        setTimeout(() => typeWriter(element, text, i + 1), 25);
+      }
+    }
+
+    function getCookie(name) {
+      let cookieValue = null;
+      if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+          const cookie = cookies[i].trim();
+          if (cookie.substring(0, name.length + 1) === (name + '=')) {
+            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+            break;
+          }
+        }
+      }
+      return cookieValue;
+    }
+
+    // GLOBAL LOADER TRIGGERS
+    const loaderOverlay = document.getElementById('global-loader-overlay');
+
+    window.showLoader = function () {
+      loaderOverlay.style.display = 'flex';
+    };
+
+    window.hideLoader = function () {
+      loaderOverlay.style.display = 'none';
+    };
+
+    // Intercept all internal link clicks to add a 1.5-second loading delay
+    document.addEventListener('click', function (e) {
+      const link = e.target.closest('a');
+
+      if (link && link.href) {
+        try {
+          const url = new URL(link.href, window.location.origin);
+          const isInternal = url.origin === window.location.origin;
+
+          // Only intercept internal links that don't open in new tabs or trigger downloads
+          if (isInternal &&
+            !link.hasAttribute('download') &&
+            link.target !== '_blank') {
+
+            // If it's a link to a different page OR a link to the current page without a hash
+            // (Exclude simple hash jumps on the same page unless they are cross-page)
+            if (url.pathname !== window.location.pathname || !url.hash) {
+              e.preventDefault();
+              showLoader();
+              setTimeout(() => {
+                window.location.href = link.href;
+              }, 1500);
+            }
+          }
+        } catch (err) {
+          // Silently ignore invalid URLs
+        }
+      }
+    });
+
+    // Form submissions still show loader immediately (except for search bar which uses AJAX)
+    document.querySelectorAll('form:not(.header-search)').forEach(form => {
+      form.addEventListener('submit', function () {
+        if (this.checkValidity()) {
+          showLoader();
+        }
+      });
+    });
+
+    // Hide loader if page is loaded from cache (bfcache)
+    window.addEventListener('pageshow', function (event) {
+      if (event.persisted) {
+        hideLoader();
+      }
+    });
+    // AJAX Search Feedback
+    document.addEventListener('DOMContentLoaded', () => {
+      const searchForm = document.querySelector('.header-search');
+      if (searchForm) {
+        const searchInput = searchForm.querySelector('input[name="q"]');
+        searchForm.addEventListener('submit', async (e) => {
+          e.preventDefault();
+          e.stopImmediatePropagation(); // Prevent the global form loader
+
+          const query = searchInput.value.trim();
+          if (!query) return;
+
+          try {
+            const response = await fetch(`{% url 'search' %}?q=${encodeURIComponent(query)}&ajax=1`);
+            const data = await response.json();
+
+            if (data.url) {
+              if (window.showLoader) showLoader();
+              // Add a small delay for the cinematic feel consistent with the site
+              setTimeout(() => {
+                window.location.href = data.url;
+              }, 1000);
+            } else if (data.error) {
+              const originalPlaceholder = searchInput.placeholder;
+              searchInput.value = '';
+              searchInput.placeholder = data.error;
+              searchInput.classList.add('search-error');
+              
+              setTimeout(() => {
+                searchInput.placeholder = originalPlaceholder;
+                searchInput.classList.remove('search-error');
+              }, 3000);
+            }
+          } catch (err) {
+            console.error('Search error:', err);
+          }
+        });
+      }
+    });
+  </script>
+
+  {% block extra_js %}{% endblock %}
+
+</body>
+
+</html>

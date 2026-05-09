@@ -1,0 +1,320 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}My Bookings | LABOURLINK{% endblock %}
+
+{% block extra_css %}
+<style>
+  .dashboard-hero {
+    background: linear-gradient(135deg, var(--dark) 0%, var(--primary) 100%);
+    color: var(--off-white);
+    padding: 60px 24px 80px;
+    border-radius: 0 0 40px 40px;
+    margin-bottom: 40px;
+  }
+
+  .main-container {
+    max-width: 1400px;
+    /* Increased for 3 columns */
+    margin: 0 auto;
+    padding: 0 20px;
+  }
+
+  .bookings-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 30px;
+    align-items: start;
+  }
+
+  @media (max-width: 1100px) {
+    .bookings-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .column-header {
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--dark);
+    margin-bottom: 24px;
+    padding-bottom: 12px;
+    border-bottom: 3px solid var(--accent);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .status-badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .badge-pending {
+    background: #fef3c7;
+    color: #92400e;
+  }
+
+  .badge-accepted {
+    background: #dcfce7;
+    color: #166534;
+  }
+
+  .badge-completed {
+    background: #d1edff;
+    color: #006eb3;
+  }
+
+  .badge-rejected {
+    background: #fee2e2;
+    color: #991b1b;
+  }
+
+  .hire-card {
+    background: white;
+    border: 1px solid var(--accent);
+    border-radius: 20px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 6px -1px rgba(10, 17, 35, 0.05);
+    transition: all 0.3s;
+  }
+
+  .hire-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    border-color: #3A3E6C;
+  }
+
+  .booking-meta {
+    font-size: 13px;
+    color: #64748b;
+    margin-bottom: 12px;
+  }
+
+  .booking-meta b {
+    color: #1e293b;
+  }
+
+  .problem-text {
+    background: var(--off-white);
+    padding: 10px 14px;
+    border-radius: 10px;
+    font-size: 13px;
+    color: var(--dark);
+    margin: 0;
+    font-style: italic;
+    opacity: 0.8;
+  }
+
+  .bulk-card {
+    background: #fff;
+    border-radius: 20px;
+    border: 1.5px dashed #e2e8f0;
+    padding: 20px;
+    margin-bottom: 20px;
+    transition: all 0.3s;
+  }
+
+  .bulk-card:hover {
+    border-color: #3A3E6C;
+    background: #f8faff;
+  }
+
+  .bulk-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: #3A3E6C;
+    margin-bottom: 15px;
+    display: block;
+  }
+
+  .bulk-info {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+
+  .bulk-stat label {
+    display: block;
+    font-size: 10px;
+    color: #94a3b8;
+    text-transform: uppercase;
+    margin-bottom: 2px;
+    font-weight: 600;
+  }
+
+  .bulk-stat span {
+    font-size: 13px;
+    font-weight: 700;
+    color: #1e293b;
+  }
+
+  .btn-rate {
+    display: inline-block;
+    margin-top: 15px;
+    width: 100%;
+    padding: 8px;
+    background: #3A3E6C;
+    color: white;
+    text-align: center;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 700;
+    text-decoration: none;
+    transition: 0.2s;
+  }
+
+  .btn-rate:hover {
+    background: var(--dark);
+  }
+
+  .rating-display {
+    margin-top: 12px;
+    color: #fbbf24;
+    font-weight: 700;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .empty-col {
+    text-align: center;
+    padding: 40px 20px;
+    color: #94a3b8;
+    background: #f8fafc;
+    border-radius: 20px;
+    border: 1px dashed #e2e8f0;
+    font-size: 14px;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-hero">
+  <div class="main-container">
+    <h1 style="margin:0; font-size:36px; font-weight:800;">My Management Hub</h1>
+    <p style="margin:10px 0 0 0; opacity:0.8; font-size:18px;">Track, manage, and review all your service requests.</p>
+  </div>
+</div>
+
+<div class="main-container" style="margin-top: -30px;">
+  <div class="bookings-grid">
+
+    <!-- PENDING COLUMN -->
+    <div id="hires" class="booking-column">
+      <div class="column-header" style="border-color: #fbbf24;">
+         Pending
+      </div>
+
+      {% for hire in pending_hires %}
+      <div class="hire-card">
+        <div class="booking-meta">
+          <div style="margin-bottom: 4px;"> <b>{{ hire.worker.user.username }}</b></div>
+          <div> {{ hire.worker.service.name }} &bull; {{ hire.date|date:'M d, Y' }}</div>
+        </div>
+        <p class="problem-text">"{{ hire.problem|truncatechars:60 }}"</p>
+      </div>
+      {% endfor %}
+
+      {% for b in pending_bulk %}
+      <div class="bulk-card">
+        <span class="bulk-title">{{ b.service.name }} Project (Bulk)</span>
+        <div class="bulk-info">
+          <div class="bulk-stat"><label>Requested</label><span>{{ b.created_at|date:'M d, Y' }}</span></div>
+          <div class="bulk-stat"><label>Personnel</label><span>{{ b.workers_needed }} Workers</span></div>
+        </div>
+      </div>
+      {% endfor %}
+
+      {% if not pending_hires and not pending_bulk %}
+      <div class="empty-col">No pending requests</div>
+      {% endif %}
+    </div>
+
+    <!-- ACCEPTED COLUMN -->
+    <div class="booking-column">
+      <div class="column-header" style="border-color: #10b981;">
+         Accepted
+      </div>
+
+      {% for hire in accepted_hires %}
+      <div class="hire-card" style="border-left: 4px solid #10b981;">
+        <div class="booking-meta">
+          <div style="margin-bottom: 4px;"> <b>{{ hire.worker.user.username }}</b></div>
+          <div> {{ hire.worker.service.name }} &bull; {{ hire.date|date:'M d, Y' }}</div>
+        </div>
+        <p class="problem-text">"{{ hire.problem|truncatechars:60 }}"</p>
+      </div>
+      {% endfor %}
+
+      {% for b in accepted_bulk %}
+      <div class="bulk-card" style="border-left: 4px solid #10b981; border-style: solid;">
+        <span class="bulk-title">{{ b.service.name }} Project</span>
+        <div class="bulk-info">
+          <div class="bulk-stat"><label>Partner</label><span>{{ b.contractor.company_name }}</span></div>
+          <div class="bulk-stat"><label>Personnel</label><span>{{ b.workers_needed }} Workers</span></div>
+        </div>
+      </div>
+      {% endfor %}
+
+      {% if not accepted_hires and not accepted_bulk %}
+      <div class="empty-col">No active jobs</div>
+      {% endif %}
+    </div>
+
+    <!-- COMPLETED COLUMN -->
+    <div class="booking-column">
+      <div class="column-header" style="border-color: #3A3E6C;">
+         Completed
+      </div>
+
+      {% for hire in completed_hires %}
+      <div class="hire-card">
+        <div class="booking-meta">
+          <div style="margin-bottom: 4px;"> <b>{{ hire.worker.user.username }}</b></div>
+          <div> {{ hire.worker.service.name }} &bull; {{ hire.date|date:'M d, Y' }}</div>
+        </div>
+        {% if hire.review %}
+        <div class="rating-display"> {{ hire.review.rating }}</div>
+        {% else %}
+        <a href="{% url 'submit_review' hire.id %}" class="btn-rate">Add Review</a>
+        {% endif %}
+      </div>
+      {% endfor %}
+
+      {% for b in completed_bulk %}
+      <div class="bulk-card">
+        <span class="bulk-title">{{ b.service.name }} (Done)</span>
+        <div class="bulk-info">
+          <div class="bulk-stat"><label>Partner</label><span>{{ b.contractor.company_name }}</span></div>
+          <div class="bulk-stat"><label>Completed</label><span>{{ b.created_at|date:'M d, Y' }}</span></div>
+        </div>
+        {% if b.bulkreview %}
+        <div class="rating-display"> {{ b.bulkreview.rating }}</div>
+        {% else %}
+        <a href="{% url 'submit_bulk_review' b.id %}" class="btn-rate">Add Review</a>
+        {% endif %}
+      </div>
+      {% endfor %}
+
+      {% if not completed_hires and not completed_bulk %}
+      <div class="empty-col">No service history</div>
+      {% endif %}
+    </div>
+
+  </div>
+</div>
+{% endblock %}
+
+
+
+
+
+
