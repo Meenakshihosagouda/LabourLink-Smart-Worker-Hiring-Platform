@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load static %}
+{% load i18n %}
 
 {% block title %}My Bookings | LABOURLINK{% endblock %}
 
@@ -199,8 +200,8 @@
 {% block content %}
 <div class="dashboard-hero">
   <div class="main-container">
-    <h1 style="margin:0; font-size:36px; font-weight:800;">My Management Hub</h1>
-    <p style="margin:10px 0 0 0; opacity:0.8; font-size:18px;">Track, manage, and review all your service requests.</p>
+    <h1 style="margin:0; font-size:36px; font-weight:800;">{% trans "My Management Hub" %}</h1>
+    <p style="margin:10px 0 0 0; opacity:0.8; font-size:18px;">{% trans "Track, manage, and review all your service requests." %}</p>
   </div>
 </div>
 
@@ -210,14 +211,14 @@
     <!-- PENDING COLUMN -->
     <div id="hires" class="booking-column">
       <div class="column-header" style="border-color: #fbbf24;">
-         Pending
+         {% trans "Pending" %}
       </div>
 
       {% for hire in pending_hires %}
       <div class="hire-card">
         <div class="booking-meta">
           <div style="margin-bottom: 4px;"> <b>{{ hire.worker.user.username }}</b></div>
-          <div> {{ hire.worker.service.name }} &bull; {{ hire.date|date:'M d, Y' }}</div>
+          <div> {% trans hire.worker.service.name %} &bull; {{ hire.date|date:'M d, Y' }}</div>
         </div>
         <p class="problem-text">"{{ hire.problem|truncatechars:60 }}"</p>
       </div>
@@ -225,30 +226,30 @@
 
       {% for b in pending_bulk %}
       <div class="bulk-card">
-        <span class="bulk-title">{{ b.service.name }} Project (Bulk)</span>
+        <span class="bulk-title">{% trans b.service.name %} {% trans "Project" %} ({% trans "Bulk" %})</span>
         <div class="bulk-info">
-          <div class="bulk-stat"><label>Requested</label><span>{{ b.created_at|date:'M d, Y' }}</span></div>
-          <div class="bulk-stat"><label>Personnel</label><span>{{ b.workers_needed }} Workers</span></div>
+          <div class="bulk-stat"><label>{% trans "Requested" %}</label><span>{{ b.created_at|date:'M d, Y' }}</span></div>
+          <div class="bulk-stat"><label>{% trans "Personnel" %}</label><span>{{ b.workers_needed }} {% trans "Workers" %}</span></div>
         </div>
       </div>
       {% endfor %}
 
       {% if not pending_hires and not pending_bulk %}
-      <div class="empty-col">No pending requests</div>
+      <div class="empty-col">{% trans "No pending requests" %}</div>
       {% endif %}
     </div>
 
     <!-- ACCEPTED COLUMN -->
     <div class="booking-column">
       <div class="column-header" style="border-color: #10b981;">
-         Accepted
+         {% trans "Accepted" %}
       </div>
 
       {% for hire in accepted_hires %}
       <div class="hire-card" style="border-left: 4px solid #10b981;">
         <div class="booking-meta">
           <div style="margin-bottom: 4px;"> <b>{{ hire.worker.user.username }}</b></div>
-          <div> {{ hire.worker.service.name }} &bull; {{ hire.date|date:'M d, Y' }}</div>
+          <div> {% trans hire.worker.service.name %} &bull; {{ hire.date|date:'M d, Y' }}</div>
         </div>
         <p class="problem-text">"{{ hire.problem|truncatechars:60 }}"</p>
       </div>
@@ -256,56 +257,56 @@
 
       {% for b in accepted_bulk %}
       <div class="bulk-card" style="border-left: 4px solid #10b981; border-style: solid;">
-        <span class="bulk-title">{{ b.service.name }} Project</span>
+        <span class="bulk-title">{% trans b.service.name %} {% trans "Project" %}</span>
         <div class="bulk-info">
-          <div class="bulk-stat"><label>Partner</label><span>{{ b.contractor.company_name }}</span></div>
-          <div class="bulk-stat"><label>Personnel</label><span>{{ b.workers_needed }} Workers</span></div>
+          <div class="bulk-stat"><label>{% trans "Partner" %}</label><span>{{ b.contractor.company_name }}</span></div>
+          <div class="bulk-stat"><label>{% trans "Personnel" %}</label><span>{{ b.workers_needed }} {% trans "Workers" %}</span></div>
         </div>
       </div>
       {% endfor %}
 
       {% if not accepted_hires and not accepted_bulk %}
-      <div class="empty-col">No active jobs</div>
+      <div class="empty-col">{% trans "No active jobs" %}</div>
       {% endif %}
     </div>
 
     <!-- COMPLETED COLUMN -->
     <div class="booking-column">
       <div class="column-header" style="border-color: #3A3E6C;">
-         Completed
+         {% trans "Completed" %}
       </div>
 
       {% for hire in completed_hires %}
       <div class="hire-card">
         <div class="booking-meta">
           <div style="margin-bottom: 4px;"> <b>{{ hire.worker.user.username }}</b></div>
-          <div> {{ hire.worker.service.name }} &bull; {{ hire.date|date:'M d, Y' }}</div>
+          <div> {% trans hire.worker.service.name %} &bull; {{ hire.date|date:'M d, Y' }}</div>
         </div>
         {% if hire.review %}
         <div class="rating-display"> {{ hire.review.rating }}</div>
         {% else %}
-        <a href="{% url 'submit_review' hire.id %}" class="btn-rate">Add Review</a>
+        <a href="{% url 'submit_review' hire.id %}" class="btn-rate">{% trans "Add Review" %}</a>
         {% endif %}
       </div>
       {% endfor %}
 
       {% for b in completed_bulk %}
       <div class="bulk-card">
-        <span class="bulk-title">{{ b.service.name }} (Done)</span>
+        <span class="bulk-title">{% trans b.service.name %} ({% trans "Done" %})</span>
         <div class="bulk-info">
-          <div class="bulk-stat"><label>Partner</label><span>{{ b.contractor.company_name }}</span></div>
-          <div class="bulk-stat"><label>Completed</label><span>{{ b.created_at|date:'M d, Y' }}</span></div>
+          <div class="bulk-stat"><label>{% trans "Partner" %}</label><span>{{ b.contractor.company_name }}</span></div>
+          <div class="bulk-stat"><label>{% trans "Completed" %}</label><span>{{ b.created_at|date:'M d, Y' }}</span></div>
         </div>
         {% if b.bulkreview %}
         <div class="rating-display"> {{ b.bulkreview.rating }}</div>
         {% else %}
-        <a href="{% url 'submit_bulk_review' b.id %}" class="btn-rate">Add Review</a>
+        <a href="{% url 'submit_bulk_review' b.id %}" class="btn-rate">{% trans "Add Review" %}</a>
         {% endif %}
       </div>
       {% endfor %}
 
       {% if not completed_hires and not completed_bulk %}
-      <div class="empty-col">No service history</div>
+      <div class="empty-col">{% trans "No service history" %}</div>
       {% endif %}
     </div>
 

@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load static %}
+{% load i18n %}
 
 {% block title %}My Dashboard | LABOURLINK{% endblock %}
 
@@ -309,10 +310,10 @@
           </span>
         </div>
         <h1 style="margin:0; font-size:clamp(32px, 5vw, 48px); font-weight:900; line-height:1.1;">
-          Activity <span style="color: #3A3E6C;">Center</span>
+          Activity <span style="color: #3A3E6C;">{% trans "Center" %}</span>
         </h1>
         <p style="margin:20px 0 0 0; opacity:0.8; font-size:18px; max-width: 500px; line-height: 1.6;">
-          Managing your professional bookings and project history.
+          {% trans "Managing your professional bookings and project history." %}
         </p>
       </div>
     </div>
@@ -324,32 +325,32 @@
     <div class="action-icon">
       <i class="fas fa-search"></i>
     </div>
-    <h3>Find Services</h3>
-    <p>Discover new professionals for your home needs.</p>
+    <h3>{% trans "Find Services" %}</h3>
+    <p>{% trans "Discover new professionals for your home needs." %}</p>
   </a>
 
   <a href="#hires" class="action-card js-reveal" style="transition-delay: 200ms;">
     <div class="action-icon">
       <i class="fas fa-calendar-check"></i>
     </div>
-    <h3>Bookings</h3>
-    <p>Track your active and upcoming appointments.</p>
+    <h3>{% trans "Bookings" %}</h3>
+    <p>{% trans "Track your active and upcoming appointments." %}</p>
   </a>
 
   <a href="#bulk" class="action-card js-reveal" style="transition-delay: 300ms;">
     <div class="action-icon">
       <i class="fas fa-project-diagram"></i>
     </div>
-    <h3>Bulk Projects</h3>
-    <p>Manage large-scale recruitment requests.</p>
+    <h3>{% trans "Bulk Projects" %}</h3>
+    <p>{% trans "Manage large-scale recruitment requests." %}</p>
   </a>
 
   <a href="{% url 'edit_profile' %}" class="action-card js-reveal" style="transition-delay: 400ms;">
     <div class="action-icon">
       <i class="fas fa-user-edit"></i>
     </div>
-    <h3>Edit Profile</h3>
-    <p>Update your personal info and preferences.</p>
+    <h3>{% trans "Edit Profile" %}</h3>
+    <p>{% trans "Update your personal info and preferences." %}</p>
   </a>
 </div>
 
@@ -359,16 +360,17 @@
     <!-- Individual Hires -->
     <section id="hires">
       <div class="section-title">
-        Recent Bookings
+        {% trans "Recent Bookings" %}
       </div>
 
       {% for hire in hires %}
       <div class="hire-card">
         <div style="flex: 1;">
           <div class="booking-meta">
-            <span> <b>Worker:</b> {{ hire.worker.user.username }}</span>
-            <span> <b>Service:</b> {{ hire.worker.service.name }}</span>
-            <span> <b>Date:</b> {{ hire.date|date:"M d, Y" }}</span>
+            <span> <b>{% trans "Worker:" %}</b> {{ hire.worker.user.username }}</span>
+            <span> <b>{% trans "Service:" %}</b> {{ hire.worker.service.name }}</span>
+            <span> <b>{% trans "Date:" %}</b> {{ hire.date|date:"M d, Y" }}</span>
+            <span style="color:#3b82f6; font-weight:700;"> <b>{% trans "Time:" %}</b> {{ hire.time_slot }}</span>
           </div>
           <p class="problem-text">"{{ hire.problem }}"</p>
         </div>
@@ -382,15 +384,15 @@
             {{ hire.review.rating }}
           </div>
           {% else %}
-          <a href="{% url 'submit_review' hire.id %}" class="btn-rate">Review</a>
+          <a href="{% url 'submit_review' hire.id %}" class="btn-rate">{% trans "Review" %}</a>
           {% endif %}
           {% endif %}
         </div>
       </div>
       {% empty %}
       <div class="empty-state">
-        <p>You haven't booked any individual professionals yet.</p>
-        <a href="{% url 'services' %}" style="color: #3A3E6C; font-weight: 700; text-decoration: none;">Explore Services
+        <p>{% trans "You haven't booked any individual professionals yet." %}</p>
+        <a href="{% url 'services' %}" style="color: #3A3E6C; font-weight: 700; text-decoration: none;">{% trans "Explore Services" %}
         </a>
       </div>
       {% endfor %}
@@ -399,13 +401,13 @@
     <!-- Bulk Hire Section -->
     <section style="margin-top:20px;">
       <div class="section-title">
-        Bulk Booking Projects
+        {% trans "Bulk Booking Projects" %}
       </div>
 
       {% for b in bulk_requests %}
       <div class="bulk-card">
         <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:20px;">
-          <h4 style="margin:0; color:#3A3E6C;">{{ b.service.name }} Recruitment</h4>
+          <h4 style="margin:0; color:#3A3E6C;">{{ b.service.name }} {% trans "Recruitment" %}</h4>
           <div style="text-align: right;">
             <div style="margin-bottom: 8px;">
               <span class="status-badge badge-{{ b.status|lower }}">{{ b.status }}</span>
@@ -416,7 +418,7 @@
               {{ b.bulkreview.rating }}
             </div>
             {% else %}
-            <a href="{% url 'submit_bulk_review' b.id %}" class="btn-rate">Review Project</a>
+            <a href="{% url 'submit_bulk_review' b.id %}" class="btn-rate">{% trans "Review Project" %}</a>
             {% endif %}
             {% endif %}
           </div>
@@ -424,32 +426,31 @@
 
         <div class="bulk-grid">
           <div class="bulk-stat">
-            <label>Requested</label>
-            <span>{{ b.created_at|date:"M d, Y" }}</span>
+            <label>{% trans "Start Date" %}</label>
+            <span>{{ b.start_date|date:"M d, Y" }}</span>
           </div>
           <div class="bulk-stat">
-            <label>Assigned To</label>
-            <span>{% if b.contractor %}{{ b.contractor.company_name }}{% else %}Waitlisting...{% endif %}</span>
+            <label>{% trans "End Date" %}</label>
+            <span>{% if b.end_date %}{{ b.end_date|date:"M d, Y" }}{% else %}N/A{% endif %}</span>
           </div>
           <div class="bulk-stat">
-            <label>Personnel</label>
-            <span>{{ b.workers_needed }} Workers</span>
+            <label>{% trans "Time Slot" %}</label>
+            <span style="color:#3b82f6;">{{ b.time_slot }}</span>
           </div>
           <div class="bulk-stat">
-            <label>Location</label>
+            <label>{% trans "Personnel" %}</label>
+            <span>{{ b.workers_needed }} {% trans "Workers" %}</span>
+          </div>
+          <div class="bulk-stat">
+            <label>{% trans "Location" %}</label>
             <span>{{ b.area }}</span>
-          </div>
-          <div class="bulk-stat">
-            <label>Timeline</label>
-            <span>{{ b.duration }}</span>
           </div>
         </div>
       </div>
       {% empty %}
       <div class="empty-state">
-        <p>No bulk booking projects currently active.</p>
-        <a href="{% url 'bulk_hire' %}" style="color: #3A3E6C; font-weight: 700; text-decoration: none;">Launch Bulk
-          Request </a>
+        <p>{% trans "No bulk booking projects currently active." %}</p>
+        <a href="{% url 'bulk_hire' %}" style="color: #3A3E6C; font-weight: 700; text-decoration: none;">{% trans "Launch Bulk Request" %} </a>
       </div>
       {% endfor %}
     </section>

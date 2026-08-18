@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load i18n %}
 
 {% block title %}Our Services | LABOURLINK{% endblock %}
 
@@ -339,8 +340,8 @@
 
 <!-- Hero Section -->
 <div class="services-hero animate-fade-in">
-  <h1>Explore Services</h1>
-  <p>Find the perfect professional for your needs. Connect with skilled workers and verified contractors in your area.
+  <h1>{% trans "Explore Services" %}</h1>
+  <p>{% trans "Find the perfect professional for your needs. Connect with skilled workers and verified contractors in your area." %}
   </p>
 </div>
 
@@ -355,26 +356,26 @@
         alt="{{ item.service.name }}">
 
       <div class="card-body">
-        <h3>{{ item.service.name }}</h3>
-        <p>{{ item.service.desc|truncatechars:100 }}</p>
+        <h3>{% trans item.service.name %}</h3>
+        <p>{% trans item.service.desc %}</p>
 
         <div class="stats-row">
           <div class="stat-item" title="Available Workers">
-            <span>{{ item.workers }}</span> Workers
+            <span>{{ item.workers }}</span> {% trans "Workers" %}
           </div>
           <div class="stat-item" title="Active Contractors">
-            <span>{{ item.contractors }}</span> Teams
+            <span>{{ item.contractors }}</span> {% trans "Teams" %}
           </div>
         </div>
 
         {% if user.is_authenticated %}
         <button onclick="openSelectionModal('{{ item.service.name }}', '{{ item.service.slug }}')" class="btn-explore"
           style="border:none; cursor:pointer;">
-          View Professionals
+          {% trans "View Professionals" %}
         </button>
         {% else %}
         <a href="{% url 'login' %}?next={{ request.path }}" class="btn-explore">
-          Sign in to continue
+          {% trans "Sign in to continue" %}
         </a>
         {% endif %}
       </div>
@@ -382,8 +383,8 @@
     {% empty %}
     <div class="empty-state animate-fade-in">
       <div style="font-size: 48px; margin-bottom: 20px;"></div>
-      <h3>No services available yet</h3>
-      <p style="color: #64748b;">Check back soon as we expand our service offerings.</p>
+      <h3>{% trans "No services available yet" %}</h3>
+      <p style="color: #64748b;">{% trans "Check back soon as we expand our service offerings." %}</p>
     </div>
     {% endfor %}
   </div>
@@ -395,23 +396,23 @@
 <!-- Selection Modal -->
 <div class="modal-overlay" id="selectionModal">
   <div class="selection-modal">
-    <h3 class="modal-title">Select Hiring Mode</h3>
-    <p class="modal-desc">How would you like to hire for <span id="serviceName"
-        style="color:var(--primary-blue); font-weight:700;">Service</span>?</p>
+    <h3 class="modal-title">{% trans "Select Hiring Mode" %}</h3>
+    <p class="modal-desc">{% trans "How would you like to hire for" %} <span id="serviceName"
+        style="color:var(--primary-blue); font-weight:700;">{% trans "Service" %}</span>?</p>
 
     <div class="selection-grid">
       <a href="#" id="individualLink" class="selection-card">
         <div class="selection-icon"><i class="fas fa-user"></i></div>
-        <div class="selection-label">Individual Worker</div>
+        <div class="selection-label">{% trans "Individual Worker" %}</div>
       </a>
 
       <a href="#" id="bulkLink" class="selection-card">
         <div class="selection-icon"><i class="fas fa-users"></i></div>
-        <div class="selection-label">Bulk Hire Team</div>
+        <div class="selection-label">{% trans "Bulk Hire Team" %}</div>
       </a>
     </div>
 
-    <button class="close-modal" onclick="closeModal()">Cancel</button>
+    <button class="close-modal" onclick="closeModal()">{% trans "Cancel" %}</button>
   </div>
 </div>
 

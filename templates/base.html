@@ -1,4 +1,5 @@
 {% load static %}
+{% load i18n %}
 <!DOCTYPE html>
 <html lang="en">
 
@@ -349,7 +350,7 @@
     {% if request.path == '/' %}
     <!-- Minimalist Search for Home Page -->
     <form method="get" action="{% url 'search' %}" class="header-search">
-      <input name="q" placeholder="Search experts..." required>
+      <input name="q" placeholder="{% trans 'Search experts...' %}" required>
       <button type="submit">
         <svg style="width:16px; height:16px; fill:currentColor" viewBox="0 0 24 24">
           <path
@@ -360,35 +361,51 @@
     {% endif %}
 
     <nav>
-      <a href="{% if user.worker %}{% url 'worker_home' %}{% else %}{% url 'home' %}{% endif %}">Home</a>
+      <a href="{% if user.worker %}{% url 'worker_home' %}{% else %}{% url 'home' %}{% endif %}">{% trans "Home" %}</a>
 
       <!-- SERVICES (Visible to Guests and Customers) -->
       {% if not user.is_authenticated or not user.worker and not user.contractorprofile %}
-      <a href="{% url 'services' %}">Services</a>
+      <a href="{% url 'services' %}">{% trans "Services" %}</a>
       {% endif %}
 
       {% if user.is_authenticated %}
       <!-- NORMAL USER -->
       {% if not user.worker and not user.contractorprofile %}
-      <a href="{% url 'my_hires' %}">My Bookings</a>
+      <a href="{% url 'my_hires' %}">{% trans "My Bookings" %}</a>
       {% endif %}
 
       <!-- WORKER -->
       {% if user.worker %}
-      <a href="{% url 'worker_dashboard' %}">Worker Dashboard</a>
+      <a href="{% url 'worker_dashboard' %}">{% trans "Worker Dashboard" %}</a>
       {% endif %}
 
       {% if user.contractorprofile %}
-      <a href="{% url 'contractor_dashboard' %}">Contractor Dashboard</a>
+      <a href="{% url 'contractor_dashboard' %}">{% trans "Contractor Dashboard" %}</a>
       {% endif %}
 
-      <a href="{% url 'edit_profile' %}">Edit Profile</a>
-      <a href="{% url 'logout' %}">Logout</a>
+      <a href="{% url 'edit_profile' %}">{% trans "Edit Profile" %}</a>
+      <a href="{% url 'logout' %}">{% trans "Logout" %}</a>
 
       {% else %}
-      <a href="{% url 'login' %}">Login</a>
+      <a href="{% url 'login' %}">{% trans "Login" %}</a>
       {% endif %}
 
+      <form action="{% url 'set_language' %}" method="post" style="display:inline-flex; align-items:center; margin-left:15px; border-left: 1px solid rgba(255,255,255,0.2); padding-left: 15px;">
+          {% csrf_token %}
+          <input name="next" type="hidden" value="{{ request.get_full_path }}">
+          <select name="language" onchange="this.form.submit()" style="padding: 6px 10px; border-radius: 8px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; cursor: pointer; font-size: 14px; outline: none; transition: 0.2s;">
+              {% get_current_language as LANGUAGE_CODE %}
+              {% get_available_languages as LANGUAGES %}
+              {% get_language_info_list for LANGUAGES as languages %}
+              {% for language in languages %}
+                  {% if language.code == 'en' or language.code == 'hi' %}
+                  <option value="{{ language.code }}" {% if language.code == LANGUAGE_CODE %}selected{% endif %} style="color: #0f172a; background: white;">
+                      {{ language.name_local }}
+                  </option>
+                  {% endif %}
+              {% endfor %}
+          </select>
+      </form>
     </nav>
   </header>
   {% endblock %}
@@ -410,13 +427,13 @@
 
   {% block footer %}
   <div class="footer-stats">
-    <div class="footer-stat-item"><b>{{ workers_count|default:"5k+" }}</b><span>Professionals</span></div>
-    <div class="footer-stat-item"><b>{{ services_count|default:"20+" }}</b><span>Service Types</span></div>
-    <div class="footer-stat-item"><b>4.8/5</b><span>User Rating</span></div>
+    <div class="footer-stat-item"><b>{{ workers_count|default:"5k+" }}</b><span>{% trans "Professionals" %}</span></div>
+    <div class="footer-stat-item"><b>{{ services_count|default:"20+" }}</b><span>{% trans "Service Types" %}</span></div>
+    <div class="footer-stat-item"><b>4.8/5</b><span>{% trans "User Rating" %}</span></div>
   </div>
   <!-- ================= FOOTER ================= -->
   <footer>
-    &copy; 2026 LABOURLINK &bull; Simple &bull; Local &bull; Reliable
+    &copy; 2026 LABOURLINK &bull; {% trans "Simple" %} &bull; {% trans "Local" %} &bull; {% trans "Reliable" %}
   </footer>
   {% endblock %}
 
@@ -635,7 +652,7 @@
   {% block chatbot %}
   {% if not user.worker and not user.contractorprofile %}
   <div id="chatbot-toggle-wrapper">
-    <div id="chatbot-hint">Need help?</div>
+    <div id="chatbot-hint">{% trans "Need help?" %}</div>
     <div id="chatbot-toggle">
       <svg viewBox="0 0 24 24">
         <path
@@ -646,14 +663,14 @@
 
   <div id="chatbot-container">
     <div id="chatbot-header">
-      <h4>LABOURLINK Chatbot</h4>
+      <h4>{% trans "LABOURLINK Chatbot" %}</h4>
       <button id="chatbot-close">✕</button>
     </div>
     <div id="chatbot-messages">
-      <div class="chat-msg bot-msg"><span class="typing-text">Hello! How can I help you?</span></div>
+      <div class="chat-msg bot-msg"><span class="typing-text">{% trans "Hello! How can I help you?" %}</span></div>
     </div>
     <div id="chatbot-input-area">
-      <input type="text" id="chatbot-input" placeholder="Type here..." autocomplete="off">
+      <input type="text" id="chatbot-input" placeholder="{% trans 'Type here...' %}" autocomplete="off">
       <button id="chatbot-send">
         <svg style="width:20px;height:20px;fill:white" viewBox="0 0 24 24">
           <path d="M2.01,21L23,12L2.01,3L2,10L17,12L2,14L2.01,21Z" />

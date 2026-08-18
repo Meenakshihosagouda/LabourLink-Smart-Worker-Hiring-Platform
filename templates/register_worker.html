@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load static %}
+{% load i18n %}
 
 {% block title %}Join LABOURLINK | Skilled Professional Registration{% endblock %}
 
@@ -73,13 +74,34 @@
     background: #0A1123;
     transform: translateY(-2px);
   }
+  .form-group {
+    position: relative;
+    margin-bottom: 24px;
+  }
+
+  .error-field {
+    border-color: #ff4d4d !important;
+    background: #fff5f5 !important;
+  }
+
+  .field-error-msg {
+    position: absolute;
+    bottom: -18px;
+    right: 10px;
+    color: #ff4d4d;
+    font-size: 10px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    pointer-events: none;
+  }
 </style>
 {% endblock %}
 
 {% block content %}
 <div class="reg-hero">
-  <h1 style="margin:0; font-size:32px;">Join the Network</h1>
-  <p style="opacity:0.8; margin-top:10px;">Connect with local customers and grow your professional profile.</p>
+  <h1 style="margin:0; font-size:32px;">{% trans "Join the Network" %}</h1>
+  <p style="opacity:0.8; margin-top:10px;">{% trans "Connect with local customers and grow your professional profile." %}</p>
 </div>
 
 <div class="form-card">
@@ -88,19 +110,23 @@
 
     <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px;">
       <div class="form-group">
-        <label>Username</label>
-        <input name="username" placeholder="Pick a username" required>
+        <label>{% trans "Username" %}</label>
+        <input name="username" placeholder="{% trans 'Pick a username' %}" required>
       </div>
       <div class="form-group">
-        <label>Password</label>
-        <input type="password" name="password" placeholder="••••••••" required>
+        <label>{% trans "Password" %}</label>
+        <input type="password" name="password" placeholder="••••••••" required
+               minlength="8"
+               title="Password must be at least 8 characters."
+               class="{% if errors.password %}error-field{% endif %}">
+        {% if errors.password %}<span class="field-error-msg">{{ errors.password }}</span>{% endif %}
       </div>
     </div>
 
     <div class="form-group">
-      <label>Your Primary Service</label>
+      <label>{% trans "Your Primary Service" %}</label>
       <select name="service" required>
-        <option value="">Select your expertise</option>
+        <option value="">{% trans "Select your expertise" %}</option>
         {% for s in services %}
         <option value="{{ s.id }}">{{ s.name }}</option>
         {% endfor %}
@@ -109,19 +135,24 @@
 
     <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px;">
       <div class="form-group">
-        <label>Phone Number</label>
-        <input type="tel" name="phone" maxlength="10" pattern="\d{10}" oninput="this.value = this.value.replace(/[^0-9]/g, '');" placeholder="How users reach you" required>
+        <label>{% trans "Phone Number" %}</label>
+        <input type="tel" name="phone" maxlength="10" pattern="\d{10}" 
+               oninput="this.value = this.value.replace(/[^0-9]/g, '');" 
+               placeholder="How users reach you" required
+               title="Phone number must be exactly 10 digits."
+               value="{{ data.phone }}" class="{% if errors.phone %}error-field{% endif %}">
+        {% if errors.phone %}<span class="field-error-msg">{{ errors.phone }}</span>{% endif %}
       </div>
       <div class="form-group">
-        <label>Service Area/Hub</label>
-        <input name="area" placeholder="e.g. Adyar, Chennai" required>
+        <label>{% trans "Service Area/Hub" %}</label>
+        <input name="area" placeholder="{% trans 'e.g. Adyar, Chennai' %}" required>
       </div>
     </div>
 
-    <button type="submit" class="btn-submit">Register as Worker</button>
+    <button type="submit" class="btn-submit">{% trans "Register as Worker" %}</button>
 
     <p style="font-size:12px; color:#94a3b8; text-align:center; margin-top:20px;">
-      Registration confirms you agree to our professional service standards.
+      {% trans "Registration confirms you agree to our professional service standards." %}
     </p>
   </form>
 </div>

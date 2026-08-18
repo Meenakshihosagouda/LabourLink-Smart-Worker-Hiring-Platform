@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load i18n %}
 
 {% block title %}LABOURLINK | Home Services{% endblock %}
 
@@ -737,7 +738,7 @@
     transform: translateY(20px);
     transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     border: 1px solid rgba(255, 255, 255, 0.1);
-    box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
   }
 
   .modal-overlay.active .selection-modal {
@@ -826,50 +827,44 @@
 
   <!-- Slide 1 -->
   <div class="slide active">
-    <div class="slide-bg"
-      style="background-image: url('{% static 'images/hero_home_repair.png' %}')">
+    <div class="slide-bg" style="background-image: url('{% static 'images/hero_home_repair.png' %}')">
     </div>
     <div class="slide-overlay"></div>
 
     <div class="content-main">
-      <span class="category-label">Home Repair</span>
-      <h1 class="headline">EXPERT<br>SERVICE</h1>
-      <p class="description">From electrical faults to plumbing emergencies, our verified experts are ready to restore
-        your home's harmony.</p>
-      <a href="{% url 'services' %}" class="btn-explore">Find Helpers &rarr;</a>
+      <span class="category-label">{% trans "Home Repair" %}</span>
+      <h1 class="headline">{% trans "EXPERT" %}<br>{% trans "SERVICE" %}</h1>
+      <p class="description">{% trans "From electrical faults to plumbing emergencies, our verified experts are ready to restore your home's harmony." %}</p>
+      <a href="{% url 'services' %}" class="btn-explore">{% trans "Find Helpers" %} &rarr;</a>
     </div>
 
   </div>
 
   <!-- Slide 2 -->
   <div class="slide">
-    <div class="slide-bg"
-      style="background-image: url('{% static 'images/hero_master_craft.png' %}')">
+    <div class="slide-bg" style="background-image: url('{% static 'images/hero_master_craft.png' %}')">
     </div>
     <div class="slide-overlay"></div>
 
     <div class="content-main">
-      <span class="category-label">Interior Improvement</span>
-      <h1 class="headline">MASTER<br>CRAFT</h1>
-      <p class="description">Upgrade your living space with master carpenters and professional painters. Quality work
-        guaranteed.</p>
-      <a href="{% url 'services' %}" class="btn-explore">See Professionals &rarr;</a>
+      <span class="category-label">{% trans "Interior Improvement" %}</span>
+      <h1 class="headline">{% trans "MASTER" %}<br>{% trans "CRAFT" %}</h1>
+      <p class="description">{% trans "Upgrade your living space with master carpenters and professional painters. Quality work guaranteed." %}</p>
+      <a href="{% url 'services' %}" class="btn-explore">{% trans "See Professionals" %} &rarr;</a>
     </div>
   </div>
 
   <!-- Slide 3 -->
   <div class="slide">
-    <div class="slide-bg"
-      style="background-image: url('{% static 'images/hero_garden_care.png' %}')">
+    <div class="slide-bg" style="background-image: url('{% static 'images/hero_garden_care.png' %}')">
     </div>
     <div class="slide-overlay"></div>
 
     <div class="content-main">
-      <span class="category-label">Outdoor & Maintenance</span>
-      <h1 class="headline">GARDEN<br>CARE</h1>
-      <p class="description">Keep your outdoors looking pristine with our gardening and general maintenance experts.
-      </p>
-      <a href="{% url 'services' %}" class="btn-explore">Explore Services &rarr;</a>
+      <span class="category-label">{% trans "Outdoor & Maintenance" %}</span>
+      <h1 class="headline">{% trans "GARDEN" %}<br>{% trans "CARE" %}</h1>
+      <p class="description">{% trans "Keep your outdoors looking pristine with our gardening and general maintenance experts." %}</p>
+      <a href="{% url 'services' %}" class="btn-explore">{% trans "Explore Services" %} &rarr;</a>
     </div>
   </div>
 
@@ -883,8 +878,8 @@
 <!-- Popular Services -->
 <section class="popular-services">
   <div class="popular-header">
-    <h2>Most Popular Services</h2>
-    <p>Handpicked professionals for your every need</p>
+    <h2>{% trans "Most Popular Services" %}</h2>
+    <p>{% trans "Handpicked professionals for your every need" %}</p>
   </div>
 
   <div class="services-grid">
@@ -895,8 +890,8 @@
         alt="{{ service.name }}">
       <div class="card-inner">
         <div>
-          <h3 style="margin: 10px 0;">{{ service.name }}</h3>
-          <p>{{ service.desc|truncatewords:12 }}</p>
+          <h3 style="margin: 10px 0;">{% trans service.name %}</h3>
+          <p>{% trans service.desc %}</p>
         </div>
       </div>
     </div>
@@ -910,8 +905,8 @@
         alt="{{ service.name }}">
       <div class="card-inner">
         <div>
-          <h3 style="margin: 10px 0;">{{ service.name }}</h3>
-          <p>{{ service.desc|truncatewords:12 }}</p>
+          <h3 style="margin: 10px 0;">{% trans service.name %}</h3>
+          <p>{% trans service.desc %}</p>
         </div>
       </div>
     </div>
@@ -919,30 +914,30 @@
   </div> <!-- Close services-grid -->
 
   <div class="toggle-container">
-    <a href="{% url 'services' %}" class="show-more-btn" style="text-decoration:none;">View All Services &rarr;</a>
+    <a href="{% url 'services' %}" class="show-more-btn" style="text-decoration:none;">{% trans "View All Services" %} &rarr;</a>
   </div>
 </section>
 
 <!-- Selection Modal for Hire Mode -->
 <div class="modal-overlay" id="selectionModal">
   <div class="selection-modal">
-    <h3 class="modal-title">Select Hiring Mode</h3>
-    <p class="modal-desc">How would you like to hire for <span id="serviceName"
-        style="color:var(--primary-blue); font-weight:700;">Service</span>?</p>
+    <h3 class="modal-title">{% trans "Select Hiring Mode" %}</h3>
+    <p class="modal-desc">{% trans "How would you like to hire for" %} <span id="serviceName"
+        style="color:var(--primary-blue); font-weight:700;">{% trans "Service" %}</span>?</p>
 
     <div class="selection-grid">
       <a href="#" id="individualLink" class="selection-card">
         <div class="selection-icon"><i class="fas fa-user"></i></div>
-        <div class="selection-label">Individual Worker</div>
+        <div class="selection-label">{% trans "Individual Worker" %}</div>
       </a>
 
       <a href="#" id="bulkLink" class="selection-card">
         <div class="selection-icon"><i class="fas fa-users"></i></div>
-        <div class="selection-label">Bulk Hire Team</div>
+        <div class="selection-label">{% trans "Bulk Hire Team" %}</div>
       </a>
     </div>
 
-    <button class="close-modal" onclick="closeModal()">Cancel</button>
+    <button class="close-modal" onclick="closeModal()">{% trans "Cancel" %}</button>
   </div>
 </div>
 
@@ -970,8 +965,8 @@
 <!-- Experience Seamless Booking (Luxury Design) -->
 <section class="booking-steps">
   <div class="cinematic-header">
-    <h2>EXPERIENCE</h2>
-    <div class="title-main">SEAMLESS HIRING</div>
+    <h2>{% trans "EXPERIENCE" %}</h2>
+    <div class="title-main">{% trans "SEAMLESS HIRING" %}</div>
   </div>
 
   <!-- Step 1 (Image Right, Text Left) -->
@@ -983,11 +978,10 @@
       </div>
     </div>
     <div class="luxury-content">
-      <div class="luxury-label">STEP 01</div>
-      <h3>Find Your<br>Expert</h3>
+      <div class="luxury-label">{% trans "STEP 01" %}</div>
+      <h3>{% trans "Find Your" %}<br>{% trans "Expert" %}</h3>
       <p>
-        Browse through our curated list of verified professionals based on your specific needs.
-        Whether it's plumbing, electrical, or home maintenance, we have the right expert for you.
+        {% trans "Browse through our curated list of verified professionals based on your specific needs. Whether it's plumbing, electrical, or home maintenance, we have the right expert for you." %}
       </p>
     </div>
   </div>
@@ -1001,11 +995,10 @@
       </div>
     </div>
     <div class="luxury-content">
-      <div class="luxury-label">STEP 02</div>
-      <h3>Book a<br>Slot</h3>
+      <div class="luxury-label">{% trans "STEP 02" %}</div>
+      <h3>{% trans "Book a" %}<br>{% trans "Slot" %}</h3>
       <p>
-        Choose a time that works for you. Our real-time availability system ensures no conflicts,
-        giving you full control over your schedule.
+        {% trans "Choose a time that works for you. Our real-time availability system ensures no conflicts, giving you full control over your schedule." %}
       </p>
     </div>
   </div>
@@ -1019,11 +1012,10 @@
       </div>
     </div>
     <div class="luxury-content">
-      <div class="luxury-label">STEP 03</div>
-      <h3>Relax &<br>Resolve</h3>
+      <div class="luxury-label">{% trans "STEP 03" %}</div>
+      <h3>{% trans "Relax &" %}<br>{% trans "Resolve" %}</h3>
       <p>
-        Sit back while our expert handles the job. Pay securely only after you're satisfied with the results.
-        Peace of mind is just a book away.
+        {% trans "Sit back while our expert handles the job. Pay securely only after you're satisfied with the results. Peace of mind is just a book away." %}
       </p>
     </div>
   </div>

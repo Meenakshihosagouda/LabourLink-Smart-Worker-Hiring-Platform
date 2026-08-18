@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load i18n %}
 
 {% block title %}Worker Dashboard | LABOURLINK{% endblock %}
 
@@ -171,8 +172,8 @@
 {% block content %}
 <div class="dashboard-hero">
   <div style="max-width: 800px; margin: 0 auto; position: relative; z-index: 2;">
-    <h1 style="margin:0; font-size:36px; font-weight:900; letter-spacing:-1px;">Mission Dashboard</h1>
-    <p style="opacity: 0.7; font-size: 16px; margin: 12px 0 24px;">Precision coordinates and live operations tracking.
+    <h1 style="margin:0; font-size:36px; font-weight:900; letter-spacing:-1px;">{% trans "Mission Dashboard" %}</h1>
+    <p style="opacity: 0.7; font-size: 16px; margin: 12px 0 24px;">{% trans "Precision coordinates and live operations tracking." %}
     </p>
   </div>
 </div>
@@ -180,72 +181,80 @@
 <div class="main-container">
   <div class="section-card js-reveal" style="padding: 0; background: transparent; border: none; box-shadow: none;">
     <div class="pill-nav">
-      <button class="pill active" onclick="showTab('pending', this)">PENDING</button>
-      <button class="pill" onclick="showTab('accepted', this)">ACCEPTED</button>
-      <button class="pill" onclick="showTab('availability', this)">AVAILABILITY / AREA</button>
-      <button class="pill" onclick="showTab('history', this)">HISTORY</button>
-      <button class="pill" onclick="showTab('reviews', this)">RATINGS AND REVIEW</button>
+      <button class="pill active" onclick="showTab('pending', this)">{% trans "PENDING" %}</button>
+      <button class="pill" onclick="showTab('accepted', this)">{% trans "ACCEPTED" %}</button>
+      <button class="pill" onclick="showTab('availability', this)">{% trans "AVAILABILITY / AREA" %}</button>
+      <button class="pill" onclick="showTab('history', this)">{% trans "HISTORY" %}</button>
+      <button class="pill" onclick="showTab('reviews', this)">{% trans "RATINGS AND REVIEW" %}</button>
     </div>
   </div>
 
   <div id="pending-tab" class="tab-content">
     <div class="section-card js-reveal">
-      <div style="font-size: 20px; font-weight: 800; margin-bottom: 24px; color: #0A1123;">INCOMING REQUESTS</div>
+      <div style="font-size: 20px; font-weight: 800; margin-bottom: 24px; color: #0A1123;">{% trans "INCOMING REQUESTS" %}</div>
       {% for job in pending_jobs %}
       <div class="job-row pending">
         <div style="display:flex; justify-content:space-between; margin-bottom: 16px;">
           <div>
             <div style="font-weight:800; font-size:18px; color:#0A1123;">{{ job.user.username }}</div>
-            <div style="font-size:14px; color:#64748b; margin-top:4px;">{{ job.date }} • {{ job.time_slot }}</div>
+            <div style="font-size:14px; color:#64748b; margin-top:4px;">
+                <b>{{ job.date }}</b> • <span style="color:#3b82f6; font-weight:700;">{{ job.time_slot }}</span>
+                <br>
+                📞 {% if job.user.userprofile %}{{ job.user.userprofile.phone }}{% else %}N/A{% endif %} • ✉️ {{ job.user.email }}
+            </div>
           </div>
           <button class="btn-action" style="background:#f1f5f9; color:#475569; border:none; cursor:pointer;"
-            onclick="showRoute('{{ job.latitude }}', '{{ job.longitude }}')">MAP VIEW</button>
+            onclick="showRoute('{{ job.latitude }}', '{{ job.longitude }}')">{% trans "MAP VIEW" %}</button>
         </div>
         <p style="margin:0 0 20px; color:#475569; line-height:1.6; font-size:15px;">{{ job.problem }}</p>
         <div style="display:flex; gap:12px;">
-          <a href="{% url 'update_hire' job.id 'Accepted' %}" class="btn-action btn-accept">APPROVE JOB</a>
-          <a href="{% url 'update_hire' job.id 'Rejected' %}" class="btn-action btn-reject">DECLINE</a>
+          <a href="{% url 'update_hire' job.id 'Accepted' %}" class="btn-action btn-accept">{% trans "APPROVE JOB" %}</a>
+          <a href="{% url 'update_hire' job.id 'Rejected' %}" class="btn-action btn-reject">{% trans "DECLINE" %}</a>
         </div>
       </div>
       {% empty %}
-      <p style="color:#64748b; text-align:center; padding:40px 0;">System idle. No pending requests.</p>
+      <p style="color:#64748b; text-align:center; padding:40px 0;">{% trans "System idle. No pending requests." %}</p>
       {% endfor %}
     </div>
   </div>
 
   <div id="accepted-tab" class="tab-content" style="display:none;">
     <div class="section-card js-reveal">
-      <div style="font-size: 20px; font-weight: 800; margin-bottom: 24px; color: #0A1123;">ACTIVE MISSIONS</div>
+      <div style="font-size: 20px; font-weight: 800; margin-bottom: 24px; color: #0A1123;">{% trans "ACTIVE MISSIONS" %}</div>
       {% for job in accepted_jobs %}
       <div class="job-row accepted">
         <div style="display:flex; justify-content:space-between; align-items:center;">
           <div>
             <div style="font-weight:800; font-size:18px; color:#0A1123;">{{ job.user.username }}</div>
-            <div style="font-size:14px; color:#64748b; margin-top:4px;">{{ job.date }} • {{ job.time_slot }}</div>
+            <div style="font-size:14px; color:#64748b; margin-top:4px;">
+                <b>{{ job.date }}</b> • <span style="color:#10b981; font-weight:800;">{{ job.time_slot }}</span>
+                <br>
+                {% trans "Contact:" %} {% if job.user.userprofile %}{{ job.user.userprofile.phone }}{% else %}N/A{% endif %}
+            </div>
             <div style="font-size:13px; color:#10b981; font-weight:700; margin-top:4px;">{{ job.address }}</div>
           </div>
           <div style="display:flex; gap:12px;">
             <button class="btn-action" style="background:#f1f5f9; color:#475569; border:none; cursor:pointer;"
-              onclick="showRoute('{{ job.latitude }}', '{{ job.longitude }}')">ROUTING</button>
-            <a href="{% url 'update_hire' job.id 'Completed' %}" class="btn-action btn-accept">MARK DONE</a>
+              onclick="showRoute('{{ job.latitude }}', '{{ job.longitude }}')">{% trans "ROUTING" %}</button>
+            <a href="{% url 'update_hire' job.id 'Completed' %}" class="btn-action btn-accept">{% trans "MARK DONE" %}</a>
           </div>
         </div>
       </div>
       {% empty %}
-      <p style="color:#64748b; text-align:center; padding:40px 0;">No active deployments.</p>
+      <p style="color:#64748b; text-align:center; padding:40px 0;">{% trans "No active deployments." %}</p>
       {% endfor %}
     </div>
   </div>
 
   <div id="availability-tab" class="tab-content" style="display:none;">
     <div class="section-card js-reveal" id="location">
-      <div style="font-size: 20px; font-weight: 800; margin-bottom: 24px; color: #0A1123;">OPERATIONAL ZONE</div>
+      <div style="font-size: 20px; font-weight: 800; margin-bottom: 24px; color: #0A1123;">{% trans "OPERATIONAL ZONE" %}</div>
 
       <div style="display: flex; gap: 12px; margin-bottom: 24px;">
-        <input type="text" id="searchBox" placeholder="Pinpoint destination..."
+        <input type="text" id="searchBox" placeholder="{% trans 'Pinpoint destination...' %}"
           style="flex:1; padding:14px 20px; border-radius:16px; border:1px solid #e2e8f0; font-size:15px; outline:none;">
         <button onclick="searchLoc()"
-          style="padding:0 24px; background:#0f172a; color:white; border:none; border-radius:16px; font-weight:700; cursor:pointer;">SEARCH</button>
+          style="padding:0 24px; background:#0f172a; color:white; border:none; border-radius:16px; font-weight:700; cursor:pointer;">{% trans "SEARCH" %}</button>
       </div>
 
       <div id="map-init-data" data-lat="{{ worker.latitude|default:'13.0827' }}"
@@ -257,13 +266,12 @@
           <input type="hidden" id="lat">
           <input type="hidden" id="lon">
           <button onclick="saveLoc()"
-            style="padding:14px 28px; background:#10b981; color:white; border:none; border-radius:16px; font-weight:800; cursor:pointer; box-shadow: 0 10px 20px rgba(16, 185, 129, 0.2);">SAVE
-            HUB LOCATION</button>
-          <span id="msg" style="margin-left: 20px; color: #10b981; font-weight: 700; display:none;">Hub coordinate stored.</span>
+            style="padding:14px 28px; background:#10b981; color:white; border:none; border-radius:16px; font-weight:800; cursor:pointer; box-shadow: 0 10px 20px rgba(16, 185, 129, 0.2);">{% trans "SAVE HUB LOCATION" %}</button>
+          <span id="msg" style="margin-left: 20px; color: #10b981; font-weight: 700; display:none;">{% trans "Hub coordinate stored." %}</span>
         </div>
         <a href="{% url 'toggle_worker' %}" class="btn-action"
           style="background:{% if worker.is_available %}#fef2f2; color:#ef4444; border:1px solid #fecaca;{% else %}#10b981; color:white;{% endif %}">
-          {% if worker.is_available %}GO OFFLINE{% else %}GO ONLINE{% endif %}
+          {% if worker.is_available %}{% trans "GO OFFLINE" %}{% else %}{% trans "GO ONLINE" %}{% endif %}
         </a>
       </div>
     </div>
@@ -271,24 +279,24 @@
 
   <div id="history-tab" class="tab-content" style="display:none;">
     <div class="section-card js-reveal">
-      <div style="font-size: 20px; font-weight: 800; margin-bottom: 24px; color: #0A1123;">MISSION LOGS</div>
+      <div style="font-size: 20px; font-weight: 800; margin-bottom: 24px; color: #0A1123;">{% trans "MISSION LOGS" %}</div>
       {% for job in completed_jobs %}
       <div class="job-row" style="background: white; border: 1px solid #f1f5f9; padding: 16px 24px;">
         <div style="display:flex; justify-content:space-between; align-items:center;">
           <span style="font-weight:800; color:#0A1123;">{{ job.user.username }}</span>
           <span style="font-size:12px; color:#94a3b8;">{{ job.date }}</span>
-          <span style="font-size:11px; font-weight:900; color:#10b981;">SUCCESSFUL</span>
+          <span style="font-size:11px; font-weight:900; color:#10b981;">{% trans "SUCCESSFUL" %}</span>
         </div>
       </div>
       {% empty %}
-      <p style="color:#64748b; text-align:center; padding:40px 0;">No history logs found.</p>
+      <p style="color:#64748b; text-align:center; padding:40px 0;">{% trans "No history logs found." %}</p>
       {% endfor %}
     </div>
   </div>
 
   <div id="reviews-tab" class="tab-content" style="display:none;">
     <div class="section-card js-reveal">
-      <div style="font-size: 20px; font-weight: 800; margin-bottom: 24px; color: #0A1123;">RATINGS AND REVIEW</div>
+      <div style="font-size: 20px; font-weight: 800; margin-bottom: 24px; color: #0A1123;">{% trans "RATINGS AND REVIEW" %}</div>
       {% for review in reviews %}
       <div class="job-row" style="border-left-color: #f59e0b;">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 12px;">
@@ -299,7 +307,7 @@
         </p>
       </div>
       {% empty %}
-      <p style="color:#64748b; text-align:center; padding:40px 0;">No intelligence reports yet.</p>
+      <p style="color:#64748b; text-align:center; padding:40px 0;">{% trans "No intelligence reports yet." %}</p>
       {% endfor %}
     </div>
   </div>
@@ -402,7 +410,8 @@
 
   function searchLoc() {
     let place = document.getElementById("searchBox").value;
-    fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${place}`)
+    if (!place) return;
+    fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(place)}`)
       .then(res => res.json())
       .then(data => {
         if (data.length > 0) {
@@ -412,7 +421,12 @@
           marker = L.marker([lat, lon]).addTo(map);
           document.getElementById("lat").value = lat;
           document.getElementById("lon").value = lon;
+        } else {
+          alert("Location not found.");
         }
+      })
+      .catch(err => {
+        console.error("Search error:", err);
       });
   }
 

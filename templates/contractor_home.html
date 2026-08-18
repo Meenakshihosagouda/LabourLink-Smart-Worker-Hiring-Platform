@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load i18n %}
 
 {% block title %}Contractor Hub | LABOURLINK{% endblock %}
 
@@ -203,7 +204,7 @@
         <h1 style="margin:0; font-size:36px; font-weight:900; letter-spacing:-1px;">
             {{ contractor.company_name }}
         </h1>
-        <p style="opacity: 0.7; font-size: 16px; margin: 12px 0 20px;">Elite fleet command center is operational.</p>
+        <p style="opacity: 0.7; font-size: 16px; margin: 12px 0 20px;">{% trans "Elite fleet command center is operational." %}</p>
 
         <div style="display: flex; flex-direction: column; align-items: center; gap: 16px;">
             <span class="badge-status {% if contractor.available_workers > 0 %}active{% endif %}">
@@ -231,8 +232,8 @@
                     <path d="M15,13L11,10V12H2V14H11V16L15,13M22,13L18,10V12H15V14H18V16L22,13Z" />
                 </svg>
             </div>
-            <h3 style="color:#0f172a; margin:0 0 12px 0; font-size:20px; font-weight:800;">Manage Fleet</h3>
-            <p style="color:#64748b; font-size:15px; margin:0; line-height:1.6;">Precision control over worker availability and team count.</p>
+            <h3 style="color:#0f172a; margin:0 0 12px 0; font-size:20px; font-weight:800;">{% trans "Manage Fleet" %}</h3>
+            <p style="color:#64748b; font-size:15px; margin:0; line-height:1.6;">{% trans "Precision control over worker availability and team count." %}</p>
         </a>
         <a href="{% url 'contractor_dashboard' %}#location" class="action-card stagger-2 js-reveal">
             <div class="action-icon">
@@ -240,8 +241,8 @@
                     <path d="M12,2A7,7 0 0,0 5,9C5,14.25 12,22 12,22C12,22 19,14.25 19,9A7,7 0 0,0 12,2M12,11.5A2.5,2.5 0 0,1 9.5,9A2.5,2.5 0 0,1 12,6.5A2.5,2.5 0 0,1 14.5,9A2.5,2.5 0 0,1 12,11.5Z" />
                 </svg>
             </div>
-            <h3 style="color:#0f172a; margin:0 0 12px 0; font-size:20px; font-weight:800;">Operational Area</h3>
-            <p style="color:#64748b; font-size:15px; margin:0; line-height:1.6;">Define your reach. Update where your fleet is deployed.</p>
+            <h3 style="color:#0f172a; margin:0 0 12px 0; font-size:20px; font-weight:800;">{% trans "Operational Area" %}</h3>
+            <p style="color:#64748b; font-size:15px; margin:0; line-height:1.6;">{% trans "Define your reach. Update where your fleet is deployed." %}</p>
         </a>
         <a href="{% url 'contractor_dashboard' %}#accepted" class="action-card stagger-3 js-reveal">
             <div class="action-icon">
@@ -249,8 +250,8 @@
                     <path d="M19,19H5V8H19M16,1V3H8V1H6V3H5C3.89,3 3,3.89 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V5C21,3.89 20.1,3 19,3H18V1M17,12H12V17H17V12Z" />
                 </svg>
             </div>
-            <h3 style="color:#0f172a; margin:0 0 12px 0; font-size:20px; font-weight:800;">Active Projects</h3>
-            <p style="color:#64748b; font-size:15px; margin:0; line-height:1.6;">Monitor in-progress bookings and fleet logistics.</p>
+            <h3 style="color:#0f172a; margin:0 0 12px 0; font-size:20px; font-weight:800;">{% trans "Active Projects" %}</h3>
+            <p style="color:#64748b; font-size:15px; margin:0; line-height:1.6;">{% trans "Monitor in-progress bookings and fleet logistics." %}</p>
         </a>
     </div>
 
@@ -298,7 +299,7 @@
         <!-- Recent Requests -->
         <div class="section-card js-reveal">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;">
-                <h2 style="margin:0; font-size:20px; font-weight:800; color:#0f172a;">Recruitment Hub</h2>
+                <h2 style="margin:0; font-size:20px; font-weight:800; color:#0f172a;">{% trans "Recruitment Hub" %}</h2>
                 <a href="{% url 'contractor_dashboard' %}#pending" style="color: #10b981; font-size: 13px; font-weight: 700; text-decoration:none; display:flex; align-items:center; gap:4px;">
                     VIEW ALL <svg style="width:14px;height:14px;fill:currentColor" viewBox="0 0 24 24">
                         <path d="M14,3V5H17.59L7.76,14.83L9.17,16.24L19,6.41V10H21V3M19,19H5V5H12V3H5C3.89,3 3,3.9 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V12H19V19Z" />
@@ -325,7 +326,7 @@
             </div>
             {% empty %}
             <div style="text-align:center; padding:40px 0; background:#f8fafc; border-radius:20px; border:2px dashed #e2e8f0;">
-                <p style="color:#94a3b8; font-weight:600; font-size: 14px;">No recruitment requests.</p>
+                <p style="color:#94a3b8; font-weight:600; font-size: 14px;">{% trans "No recruitment requests." %}</p>
             </div>
             {% endfor %}
         </div>
@@ -333,7 +334,7 @@
         <!-- Reviews -->
         <div class="section-card js-reveal">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;">
-                <h2 style="margin:0; font-size:20px; font-weight:800; color:#0f172a;">Client Feedback</h2>
+                <h2 style="margin:0; font-size:20px; font-weight:800; color:#0f172a;">{% trans "Client Feedback" %}</h2>
                 <a href="{% url 'contractor_dashboard' %}#reviews" style="color: var(--primary); font-size: 13px; font-weight: 700; text-decoration:none;">ALL REVIEWS</a>
             </div>
 
@@ -355,7 +356,7 @@
             </div>
             {% empty %}
             <div style="text-align:center; padding:30px 0;">
-                <p style="color:#94a3b8; font-weight:600; font-size: 14px;">No reviews yet.</p>
+                <p style="color:#94a3b8; font-weight:600; font-size: 14px;">{% trans "No reviews yet." %}</p>
             </div>
             {% endfor %}
         </div>

@@ -1,12 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
-from django.core.validators import RegexValidator
-
-# 10-digit phone validator
-phone_validator = RegexValidator(
-    regex=r'^\d{10}$',
-    message="Phone number must be exactly 10 digits."
-)
+from .validators import validate_phone, validate_name
 
 class Service(models.Model):
     name = models.CharField(max_length=50)
@@ -21,7 +15,7 @@ class Service(models.Model):
 class Worker(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     service = models.ForeignKey(Service, on_delete=models.CASCADE)
-    phone = models.CharField(max_length=10, validators=[phone_validator])
+    phone = models.CharField(max_length=10, validators=[validate_phone])
     area = models.CharField(max_length=100)
     is_available = models.BooleanField(default=True)
     latitude = models.FloatField(null=True, blank=True)
@@ -69,7 +63,7 @@ class Worker(models.Model):
 class ContractorProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     company_name = models.CharField(max_length=100)
-    phone = models.CharField(max_length=10, validators=[phone_validator])
+    phone = models.CharField(max_length=10, validators=[validate_phone])
     service = models.ForeignKey(Service, on_delete=models.CASCADE)
     area = models.CharField(max_length=100)
 
@@ -120,7 +114,7 @@ class ContractorProfile(models.Model):
 
 class ClientProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    phone = models.CharField(max_length=10, validators=[phone_validator])
+    phone = models.CharField(max_length=10, validators=[validate_phone])
 
     def __str__(self):
         return self.user.username
@@ -137,17 +131,20 @@ class Hire(models.Model):
     )
 
     TIME_SLOTS = (
-        ('Morning', 'Morning (9 AM - 12 PM)'),
-        ('Afternoon', 'Afternoon (12 PM - 4 PM)'),
-        ('Evening', 'Evening (4 PM - 8 PM)'),
+        ('08-10', '08:00 AM - 10:00 AM'),
+        ('10-12', '10:00 AM - 12:00 PM'),
+        ('12-14', '12:00 PM - 02:00 PM'),
+        ('14-16', '02:00 PM - 04:00 PM'),
+        ('16-18', '04:00 PM - 06:00 PM'),
+        ('18-20', '06:00 PM - 08:00 PM'),
     )
 
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     worker = models.ForeignKey(Worker, on_delete=models.CASCADE)
     
     # Contact & Job Details
-    name = models.CharField(max_length=100, blank=True)
-    phone = models.CharField(max_length=10, blank=True, validators=[phone_validator])
+    name = models.CharField(max_length=100, blank=True, validators=[validate_name])
+    phone = models.CharField(max_length=10, blank=True, validators=[validate_phone])
     email = models.EmailField(blank=True)
     address = models.TextField(blank=True)
     
@@ -157,7 +154,7 @@ class Hire(models.Model):
     
     problem = models.TextField()
     date = models.DateField()
-    time_slot = models.CharField(max_length=20, choices=TIME_SLOTS, default='Morning')
+    time_slot = models.CharField(max_length=20, choices=TIME_SLOTS, default='08-10')
     
     status = models.CharField(max_length=20, choices=STATUS, default='Pending')
     created_at = models.DateTimeField(auto_now_add=True)
@@ -194,17 +191,19 @@ class BulkRequest(models.Model):
     service = models.ForeignKey(Service, on_delete=models.CASCADE)
     
     # Contact Details
-    name = models.CharField(max_length=100, blank=True)
-    phone = models.CharField(max_length=10, blank=True, validators=[phone_validator])
+    name = models.CharField(max_length=100, blank=True, validators=[validate_name])
+    phone = models.CharField(max_length=10, blank=True, validators=[validate_phone])
     email = models.EmailField(blank=True)
 
     workers_needed = models.IntegerField()
     area = models.CharField(max_length=120)
-    duration = models.CharField(max_length=50)
+    duration = models.CharField(max_length=50, blank=True, null=True)
     description = models.TextField()
     strategic_notes = models.TextField(blank=True)
     status = models.CharField(max_length=20, choices=STATUS, default='Pending')
     start_date = models.DateField(null=True, blank=True)
+    end_date = models.DateField(null=True, blank=True)
+    time_slot = models.CharField(max_length=20, choices=Hire.TIME_SLOTS, default='08-10')
     latitude = models.FloatField(null=True, blank=True)
     longitude = models.FloatField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)

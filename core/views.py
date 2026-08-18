@@ -14,8 +14,13 @@ import time
 
 from .models import Service, Worker, Hire, Review, ContractorProfile, BulkRequest, BulkReview, ClientProfile
 from .expert_system import predict_best_worker, predict_best_contractor
-from .utils import calculate_distance
+from .utils import calculate_distance, safe_float
 from .ai import detect_service, chatbot_response
+from .validators import (
+    validate_name, validate_phone, validate_password, 
+    validate_booking_date, validate_booking_time, validate_email_custom
+)
+from django.core.exceptions import ValidationError
 from django.http import JsonResponse
 import json
 
@@ -209,8 +214,12 @@ def service_page(request, slug):
 
     # Save to session when user explicitly submits location
     if lat and lon:
-        request.session['user_lat'] = lat
-        request.session['user_lon'] = lon
+        # Robust check: ensure they are not literal 'None' or 'null' strings
+        f_lat = safe_float(lat)
+        f_lon = safe_float(lon)
+        if f_lat is not None and f_lon is not None:
+            request.session['user_lat'] = str(f_lat)
+            request.session['user_lon'] = str(f_lon)
 
     # Map pre-fill: restore previous pin without triggering results
     map_lat = lat or request.session.get('user_lat')
@@ -328,9 +337,33 @@ def register_user(request):
             messages.error(request, "All fields are required")
             return render(request, 'register_user.html')
 
+        errors = {}
+        try:
+            validate_name(f)
+        except ValidationError as error:
+            errors['first_name'] = error.message
+        
+        try:
+            validate_email_custom(e)
+        except ValidationError as error:
+            errors['email'] = error.messages[0] if hasattr(error, 'messages') else error.message
+            
+        try:
+            validate_phone(ph)
+        except ValidationError as error:
+            errors['phone'] = error.message
+            
+        try:
+            validate_password(p)
+        except ValidationError as error:
+            errors['password'] = error.message
+
+        if errors:
+            return render(request, 'register_user.html', {'errors': errors, 'data': request.POST})
+
         if User.objects.filter(username=u).exists():
             messages.error(request, "Username already exists")
-            return render(request, 'register_user.html')
+            return render(request, 'register_user.html', {'data': request.POST})
 
         user = User.objects.create_user(
             username=u, 
@@ -362,6 +395,24 @@ def register_worker(request):
         if not all([username, password, service, phone, area]):
             messages.error(request, "All fields are required")
             return render(request, 'register_worker.html', {'services': services})
+
+        errors = {}
+        try:
+            validate_phone(phone)
+        except ValidationError as error:
+            errors['phone'] = error.message
+        
+        try:
+            validate_password(password)
+        except ValidationError as error:
+            errors['password'] = error.message
+
+        if errors:
+            return render(request, 'register_worker.html', {
+                'services': services, 
+                'errors': errors,
+                'data': request.POST
+            })
 
         # 2️⃣ username already exists
         if User.objects.filter(username=username).exists():
@@ -484,15 +535,26 @@ def hire_worker(request, wid):
         messages.error(request, "Please fill required fields (Phone, Address, Problem, Date).")
         return redirect('service', slug=worker.service.slug)
 
+    try:
+        if name: validate_name(name)
+        validate_phone(phone)
+        if email: validate_email_custom(email)
+        validate_booking_date(date_str)
+        if time_slot: validate_booking_time(date_str, time_slot)
+    except ValidationError as error:
+        messages.error(request, error.messages[0] if hasattr(error, 'messages') else error.message)
+        return redirect('service', slug=worker.service.slug)
+
     # 1.5️⃣ Date validation (No same-day booking for workers)
+    # Keeping the original logic but moving it after general validation
     try:
         booking_date = datetime.strptime(date_str, '%Y-%m-%d').date()
     except ValueError:
         messages.error(request, "Invalid date format.")
         return redirect('service', slug=worker.service.slug)
 
-    if booking_date <= date.today():
-        messages.error(request, "Bookings for individual professionals must be scheduled for tomorrow onwards.")
+    if booking_date < date.today():
+        messages.error(request, "Booking date cannot be in the past.")
         return redirect('service', slug=worker.service.slug)
 
     # 2️⃣ Check worker availability
@@ -500,15 +562,16 @@ def hire_worker(request, wid):
         messages.error(request, "Worker is currently not available.")
         return redirect('service', slug=worker.service.slug)
 
-    # 3️⃣ Check date conflict
+    # 3️⃣ Check date & time conflict
     conflict = Hire.objects.filter(
         worker=worker,
         date=booking_date,
+        time_slot=time_slot,
         status__in=["Pending", "Accepted"]
     ).exists()
 
     if conflict:
-        messages.error(request, "Worker is already hired for this date.")
+        messages.error(request, f"Worker is already hired for the {time_slot} slot on this date.")
         return redirect('service', slug=worker.service.slug)
 
     # 4️⃣ Create hire
@@ -521,9 +584,9 @@ def hire_worker(request, wid):
         address=address,
         problem=problem,
         date=booking_date,
-        time_slot=time_slot or 'Morning',
-        latitude=float(lat) if lat else None,
-        longitude=float(lon) if lon else None,
+        time_slot=time_slot or '08-10',
+        latitude=safe_float(lat),
+        longitude=safe_float(lon),
         status="Pending"
     )
 
@@ -600,6 +663,7 @@ def bulk_hire(request):
         service_id = request.POST.get('service')
         workers_needed = request.POST.get('workers_needed')
         area = request.POST.get('area', '').strip()
+        time_slot = request.POST.get('time_slot')
 
         # Defensive check
         if not service_id or not workers_needed:
@@ -612,16 +676,36 @@ def bulk_hire(request):
             })
 
         workers_needed = int(workers_needed)
-        search_date = datetime.strptime(request.POST.get('start_date'), '%Y-%m-%d').date()
+        try:
+            search_date_str = request.POST.get('start_date')
+            end_date_str = request.POST.get('end_date')
+            validate_booking_date(search_date_str)
+            if time_slot: validate_booking_time(search_date_str, time_slot)
+            
+            search_date = datetime.strptime(search_date_str, '%Y-%m-%d').date()
+            if end_date_str:
+                end_date = datetime.strptime(end_date_str, '%Y-%m-%d').date()
+                if end_date < search_date:
+                    raise ValidationError("End date cannot be before start date.")
+            else:
+                end_date = search_date
+        except (ValidationError, ValueError) as error:
+            messages.error(request, error.messages[0] if hasattr(error, 'messages') else str(error))
+            return render(request, 'bulk_hire.html', {
+                'services': services,
+                'user_phone': user_phone,
+            })
 
         # Get lat/lon from request or session
         user_lat = request.POST.get('latitude') or request.session.get('user_lat')
         user_lon = request.POST.get('longitude') or request.session.get('user_lon')
 
         # Save to session for persistence
-        if request.POST.get('latitude') and request.POST.get('longitude'):
-            request.session['user_lat'] = request.POST.get('latitude')
-            request.session['user_lon'] = request.POST.get('longitude')
+        f_lat = safe_float(request.POST.get('latitude'))
+        f_lon = safe_float(request.POST.get('longitude'))
+        if f_lat is not None and f_lon is not None:
+            request.session['user_lat'] = str(f_lat)
+            request.session['user_lon'] = str(f_lon)
 
         # STEP 1: user is searching for contractors
         if not request.POST.get('contractor'):
@@ -631,11 +715,14 @@ def bulk_hire(request):
             # We'll filter in Python because we need to calculate complex availability for each
             contractors = []
             for c in contractors_qs:
-                # Calculate reserved workers for this date (Accepted jobs starting on or before search date)
+                # Calculate reserved workers (projects that overlap with this search date and time slot)
+                # Including both Pending and Accepted requests to prevent over-commitment
                 reserved = BulkRequest.objects.filter(
                     contractor=c,
-                    status='Accepted',
-                    start_date__lte=search_date
+                    status__in=['Pending', 'Accepted'],
+                    start_date__lte=search_date,
+                    end_date__gte=search_date,
+                    time_slot=time_slot
                 ).aggregate(Sum('workers_needed'))['workers_needed__sum'] or 0
                 
                 effective_available = c.total_workers - reserved
@@ -683,6 +770,7 @@ def bulk_hire(request):
                 'client_name': request.POST.get('name'),
                 'client_phone': request.POST.get('phone'),
                 'client_email': request.POST.get('email'),
+                'time_slot': time_slot,
                 'strategic_notes': request.POST.get('strategic_notes')
             })
 
@@ -692,17 +780,30 @@ def bulk_hire(request):
             id=request.POST.get('contractor')
         )
         
-        # Re-calculate availability for the selected date
+        # Re-calculate availability for the selected date and time slot range
         reserved = BulkRequest.objects.filter(
             contractor=contractor,
-            status='Accepted',
-            start_date__lte=search_date
+            status__in=['Pending', 'Accepted'],
+            start_date__lte=search_date,
+            end_date__gte=search_date,
+            time_slot=time_slot
         ).aggregate(Sum('workers_needed'))['workers_needed__sum'] or 0
         
         effective_available = contractor.total_workers - reserved
 
         if effective_available < workers_needed:
             messages.error(request, f"Contractor only has {effective_available} workers available for that date.")
+            return redirect('bulk_hire')
+
+        try:
+            name = request.POST.get('name')
+            phone = request.POST.get('phone')
+            email = request.POST.get('email')
+            if name: validate_name(name)
+            if phone: validate_phone(phone)
+            if email: validate_email_custom(email)
+        except ValidationError as error:
+            messages.error(request, error.messages[0] if hasattr(error, 'messages') else error.message)
             return redirect('bulk_hire')
 
         BulkRequest.objects.create(
@@ -716,10 +817,12 @@ def bulk_hire(request):
             description=request.POST.get('description'),
             strategic_notes=request.POST.get('strategic_notes'),
             area=request.POST.get('area'),
-            duration=request.POST.get('duration'),
+            duration=request.POST.get('duration', ''),
             start_date=request.POST.get('start_date'),
-            latitude=float(user_lat) if user_lat else None,
-            longitude=float(user_lon) if user_lon else None,
+            end_date=request.POST.get('end_date') or request.POST.get('start_date'),
+            time_slot=time_slot or '08-10',
+            latitude=safe_float(user_lat),
+            longitude=safe_float(user_lon),
             status='Pending'
         )
 
@@ -744,13 +847,45 @@ def edit_profile(request):
     client = getattr(user, 'clientprofile', None)
 
     if request.method == "POST":
-        # General User Fields
-        user.first_name = request.POST.get('first_name', user.first_name)
-        user.last_name = request.POST.get('last_name', user.last_name)
-        user.email = request.POST.get('email', user.email)
-        user.save()
-
+        f_name = request.POST.get('first_name')
+        l_name = request.POST.get('last_name')
+        email = request.POST.get('email')
         phone = request.POST.get('phone')
+
+        errors = {}
+        try:
+            if f_name: validate_name(f_name)
+        except ValidationError as error:
+            errors['first_name'] = error.message
+        
+        try:
+            if l_name: validate_name(l_name)
+        except ValidationError as error:
+            errors['last_name'] = error.message
+            
+        try:
+            if email: validate_email_custom(email)
+        except ValidationError as error:
+            errors['email'] = error.messages[0] if hasattr(error, 'messages') else error.message
+            
+        try:
+            if phone: validate_phone(phone)
+        except ValidationError as error:
+            errors['phone'] = error.message
+
+        if errors:
+            return render(request, 'edit_profile.html', {
+                'worker': worker,
+                'contractor': contractor,
+                'client': client,
+                'errors': errors
+            })
+
+        # General User Fields
+        user.first_name = f_name or user.first_name
+        user.last_name = l_name or user.last_name
+        user.email = email or user.email
+        user.save()
 
         # Role Specific Fields
         if worker:
@@ -807,32 +942,65 @@ def toggle_worker_availability(request):
 
 
 def register_contractor(request):
-    services = Service.objects.all()   # ← REQUIRED
+    services = Service.objects.all()
 
     if request.method == 'POST':
-        user = User.objects.create_user(
-            username=request.POST['username'],
-            password=request.POST['password']
-        )
+        u = request.POST.get('username')
+        p = request.POST.get('password')
+        cn = request.POST.get('company_name')
+        ph = request.POST.get('phone')
+        ar = request.POST.get('area')
+        srv = request.POST.get('service')
+        tw = request.POST.get('total_workers')
 
-        total = int(request.POST['total_workers'])
+        if not all([u, p, cn, ph, ar, srv, tw]):
+            messages.error(request, "All fields are required")
+            return render(request, 'register_contractor.html', {'services': services, 'data': request.POST})
 
-        ContractorProfile.objects.create(
-            user=user,
-            company_name=request.POST['company_name'],
-            phone=request.POST['phone'],
-            area=request.POST['area'],
-            service_id=request.POST['service'],
-            total_workers=total,
-            available_workers=total
-        )
+        errors = {}
+        try:
+            validate_phone(ph)
+        except ValidationError as error:
+            errors['phone'] = error.message
+        
+        try:
+            validate_password(p)
+        except ValidationError as error:
+            errors['password'] = error.message
 
-        messages.success(request, "Contractor registered successfully")
-        return redirect('login')
+        if errors:
+            return render(request, 'register_contractor.html', {
+                'services': services, 
+                'errors': errors,
+                'data': request.POST
+            })
 
-    return render(request, 'register_contractor.html', {
-        'services': services   # ← MUST BE PASSED
-    })
+        if User.objects.filter(username=u).exists():
+            messages.error(request, "Username already exists")
+            return render(request, 'register_contractor.html', {'services': services, 'data': request.POST})
+
+        try:
+            user = User.objects.create_user(username=u, password=p)
+            
+            total = int(tw)
+            ContractorProfile.objects.create(
+                user=user,
+                company_name=cn,
+                phone=ph,
+                area=ar,
+                service_id=srv,
+                total_workers=total,
+                available_workers=total
+            )
+
+            messages.success(request, "Contractor registered successfully")
+            return redirect('login')
+
+        except IntegrityError:
+            messages.error(request, "This account already exists")
+            return render(request, 'register_contractor.html', {'services': services, 'data': request.POST})
+
+    return render(request, 'register_contractor.html', {'services': services})
 
 
 @login_required
@@ -977,11 +1145,12 @@ def save_contractor_location(request):
     if request.method == "POST":
         contractor = request.user.contractorprofile
         data = json.loads(request.body)
-        lat = data.get("latitude")
-        lon = data.get("longitude")
+        lat = safe_float(data.get("latitude"))
+        lon = safe_float(data.get("longitude"))
 
-        contractor.latitude = lat
-        contractor.longitude = lon
+        if lat is not None and lon is not None:
+            contractor.latitude = lat
+            contractor.longitude = lon
 
         # ⛔ VERY IMPORTANT → prevent block
         time.sleep(1)
@@ -1019,11 +1188,12 @@ def save_worker_location(request):
     if request.method == "POST":
         worker = request.user.worker
         data = json.loads(request.body)
-        lat = data.get("latitude")
-        lon = data.get("longitude")
+        lat = safe_float(data.get("latitude"))
+        lon = safe_float(data.get("longitude"))
 
-        worker.latitude = lat
-        worker.longitude = lon
+        if lat is not None and lon is not None:
+            worker.latitude = lat
+            worker.longitude = lon
 
         time.sleep(1)
         headers = {"User-Agent": "findmyworker-app"}

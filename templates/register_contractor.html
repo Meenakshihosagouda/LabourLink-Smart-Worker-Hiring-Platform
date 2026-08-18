@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load static %}
+{% load i18n %}
 
 {% block title %}Join LABOURLINK | Contractor Registration{% endblock %}
 
@@ -78,8 +79,8 @@
 
 {% block content %}
 <div class="reg-hero">
-  <h1 style="margin:0; font-size:32px;">Business Partnership</h1>
-  <p style="opacity:0.8; margin-top:10px;">Grow your contracting firm with verified bulk requests.</p>
+  <h1 style="margin:0; font-size:32px;">{% trans "Business Partnership" %}</h1>
+  <p style="opacity:0.8; margin-top:10px;">{% trans "Grow your contracting firm with verified bulk requests." %}</p>
 </div>
 
 <div class="form-card">
@@ -88,47 +89,49 @@
 
     <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px;">
       <div class="form-group">
-        <label>Username</label>
-        <input name="username" placeholder="Pick a username" required>
+        <label>{% trans "Username" %}</label>
+        <input name="username" placeholder="{% trans 'Pick a username' %}" value="{{ data.username }}" required>
       </div>
       <div class="form-group">
-        <label>Password</label>
+        <label>{% trans "Password" %}</label>
         <input type="password" name="password" placeholder="••••••••" required>
+        {% if errors.password %}<small style="color: #991B1B;">{{ errors.password }}</small>{% endif %}
       </div>
     </div>
 
     <div class="form-group">
-      <label>Company Legal Name</label>
-      <input name="company_name" placeholder="e.g. BuildRight Solutions" required>
+      <label>{% trans "Company Legal Name" %}</label>
+      <input name="company_name" placeholder="{% trans 'e.g. BuildRight Solutions' %}" value="{{ data.company_name }}" required>
     </div>
 
     <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px;">
       <div class="form-group">
-        <label>Contact Phone</label>
-        <input type="tel" name="phone" maxlength="10" pattern="\d{10}" oninput="this.value = this.value.replace(/[^0-9]/g, '');" placeholder="Contact number" required>
+        <label>{% trans "Contact Phone" %}</label>
+        <input type="tel" name="phone" maxlength="10" pattern="\d{10}" oninput="this.value = this.value.replace(/[^0-9]/g, '');" placeholder="Contact number" value="{{ data.phone }}" required>
+        {% if errors.phone %}<small style="color: #991B1B;">{{ errors.phone }}</small>{% endif %}
       </div>
       <div class="form-group">
-        <label>Operational Area</label>
-        <input name="area" placeholder="e.g. Chennai" required>
+        <label>{% trans "Operational Area" %}</label>
+        <input name="area" placeholder="{% trans 'e.g. Chennai' %}" value="{{ data.area }}" required>
       </div>
     </div>
 
     <div class="form-group">
-      <label>Primary Service</label>
+      <label>{% trans "Primary Service" %}</label>
       <select name="service" required>
-        <option value="">Choose Service Vertical</option>
+        <option value="">{% trans "Choose Service Vertical" %}</option>
         {% for s in services %}
-        <option value="{{ s.id }}">{{ s.name }}</option>
+        <option value="{{ s.id }}" {% if data.service == s.id|stringformat:"s" %}selected{% endif %}>{{ s.name }}</option>
         {% endfor %}
       </select>
     </div>
 
     <div class="form-group">
-      <label>Fleet Size (Workers)</label>
-      <input type="number" name="total_workers" placeholder="Total workers available" min="1" required>
+      <label>{% trans "Fleet Size (Workers)" %}</label>
+      <input type="number" name="total_workers" placeholder="{% trans 'Total workers available' %}" min="1" value="{{ data.total_workers }}" required>
     </div>
 
-    <button type="submit" class="btn-submit">Initialize Contractor Profile</button>
+    <button type="submit" class="btn-submit">{% trans "Initialize Contractor Profile" %}</button>
   </form>
 </div>
 {% endblock %}

@@ -359,75 +359,154 @@
           <label>Full Name</label>
           <input type="text" name="name" class="input-premium" 
                  value="{% if client_name %}{{ client_name }}{% elif user.is_authenticated and user.first_name %}{{ user.first_name }} {{ user.last_name }}{% else %}{{ user.username }}{% endif %}"
-                 required placeholder="e.g. Rahul Sharma">
+                 required placeholder="e.g. Rahul Sharma"
+                 pattern="[A-Za-z\s]+" title="Name should contain only alphabetic characters and spaces.">
         </div>
 
         <div class="input-group-premium">
           <label>Phone Number</label>
           <input type="tel" name="phone" class="input-premium" 
                  value="{% if client_phone %}{{ client_phone }}{% elif user_phone %}{{ user_phone }}{% endif %}" 
-                 maxlength="10" pattern="\d{10}" oninput="this.value = this.value.replace(/[^0-9]/g, '');" required placeholder="+91 98765 43210">
+                 maxlength="10" pattern="\d{10}" oninput="this.value = this.value.replace(/[^0-9]/g, '');" required 
+                 placeholder="9876543210" title="Phone number must be exactly 10 digits.">
         </div>
 
         <div class="input-group-premium" style="margin-bottom: 0;">
           <label>Email Address</label>
           <input type="email" name="email" class="input-premium" 
                  value="{% if client_email %}{{ client_email }}{% elif user.is_authenticated %}{{ user.email }}{% endif %}" 
-                 required placeholder="rahul@example.com">
+                 required placeholder="rahul@example.com"
+                 pattern="[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.(com|net|in|org|co\.in)"
+                 title="Please enter a valid email address (e.g., .com, .net, .in).">
         </div>
       </div>
 
       <!-- Card 2: Project Scope -->
       <div class="wizard-card">
         <div class="step-indicator" style="background: #fef3c7; color: #d97706;">Step 02</div>
-        <div class="step-title">️ Project Scope</div>
+        <div class="step-title"> Project Scope</div>
         
         <div class="input-group-premium">
-          <label>Services Category</label>
-          <select name="service" class="input-premium" required>
-            {% for s in services %}
-            <option value="{{ s.id }}" {% if selected_service == s.slug %}selected{% endif %}>{{ s.name }} Expertise</option>
-            {% endfor %}
-          </select>
+            <label>Services Category</label>
+            <select name="service" class="input-premium" required>
+                {% for s in services %}
+                <option value="{{ s.id }}" {% if selected_service == s.slug %}selected{% endif %}>{{ s.name }} Expertise</option>
+                {% endfor %}
+            </select>
         </div>
-
         <div class="input-group-premium">
-          <label>Scale of Requirement (Workers Needed)</label>
-          <input type="number" name="workers_needed" class="input-premium" min="1" 
-                 placeholder="e.g. 50" value="{{ request.POST.workers_needed }}" required>
+            <label>Workers Needed</label>
+            <input type="number" name="workers_needed" class="input-premium" min="1" 
+                   placeholder="e.g. 50" value="{{ request.POST.workers_needed|default:'' }}" required>
         </div>
 
         <div class="input-group-premium" style="margin-bottom: 0;">
           <label>Project Brief & Requirements</label>
           <textarea name="description" rows="1" class="input-premium" 
-                    placeholder="Briefly describe project scope...">{{ request.POST.description }}</textarea>
+                    placeholder="Briefly describe project scope...">{{ request.POST.description|default:'' }}</textarea>
         </div>
       </div>
     </div><!-- end wizard-grid -->
 
-    <!-- Card 3: Timeline & Logistics (full-width) -->
+    <!-- Card 3: Timeline -->
     <div class="wizard-card">
-      <div class="step-indicator" style="background: #f5f3ff; color: #7c3aed;">Step 03</div>
-      <div class="step-title"> Timeline</div>
+        <div class="step-indicator" style="background: #f5f3ff; color: #7c3aed;">Step 03</div>
+        <div class="step-title"> Timeline</div>
 
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
-        <div class="input-group-premium" style="margin-bottom:0;">
-          <label>Launch Date</label>
-          <input type="date" name="start_date" id="launch_date" class="input-premium"
-                 value="{{ request.POST.start_date }}" required>
-          <script>
-            document.addEventListener('DOMContentLoaded', function() {
-              const dateInput = document.getElementById('launch_date');
-              if(dateInput) dateInput.min = new Date().toISOString().split("T")[0];
-            });
-          </script>
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px;">
+            <div class="input-group-premium" style="margin-bottom:0;">
+                <label>Launch Date</label>
+                <input type="date" name="start_date" id="launch_date" class="input-premium"
+                       value="{{ request.POST.start_date|default:'' }}" required>
+            </div>
+            <div class="input-group-premium" style="margin-bottom:0;">
+                <label>End Date</label>
+                <input type="date" name="end_date" id="end_date" class="input-premium"
+                       value="{{ request.POST.end_date|default:'' }}" required>
+            </div>
+            <div class="input-group-premium" style="margin-bottom:0;">
+                <label>Start Time Slot</label>
+                <select name="time_slot" id="time_slot" class="input-premium">
+                    <option value="08-10" {% if request.POST.time_slot == '08-10' %}selected{% endif %}>08:00 AM - 10:00 AM</option>
+                    <option value="10-12" {% if request.POST.time_slot == '10-12' %}selected{% endif %}>10:00 AM - 12:00 PM</option>
+                    <option value="12-14" {% if request.POST.time_slot == '12-14' %}selected{% endif %}>12:00 PM - 02:00 PM</option>
+                    <option value="14-16" {% if request.POST.time_slot == '14-16' %}selected{% endif %}>02:00 PM - 04:00 PM</option>
+                    <option value="16-18" {% if request.POST.time_slot == '16-18' %}selected{% endif %}>04:00 PM - 06:00 PM</option>
+                    <option value="18-20" {% if request.POST.time_slot == '18-20' %}selected{% endif %}>06:00 PM - 08:00 PM</option>
+                </select>
+            </div>
         </div>
-        <div class="input-group-premium" style="margin-bottom:0;">
-          <label>Project Duration</label>
-          <input type="text" name="duration" class="input-premium"
-                 placeholder="e.g. 6 Months" value="{{ request.POST.duration }}">
-        </div>
-      </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+          const dateInput = document.getElementById('launch_date');
+          const endDateInput = document.getElementById('end_date');
+          const timeSelect = document.getElementById('time_slot');
+          const todayStr = new Date().toLocaleDateString('en-CA');
+          
+          if(dateInput) dateInput.min = todayStr;
+
+          function updateTimeSlots() {
+            if (!timeSelect || !dateInput) return;
+            
+            // Ensure end date cannot be earlier than start date
+            if (endDateInput) {
+                endDateInput.min = dateInput.value || todayStr;
+            }
+
+            const now = new Date();
+            const currentHour = now.getHours();
+            const isToday = dateInput.value === todayStr;
+            const options = timeSelect.options;
+            let availableCount = 0;
+            let firstAvailableIndex = -1;
+
+            for (let i = 0; i < options.length; i++) {
+              const opt = options[i];
+              const val = opt.value;
+              let shouldDisable = false;
+              if (isToday) {
+                if (val === '08-10' && currentHour >= 10) shouldDisable = true;
+                if (val === '10-12' && currentHour >= 12) shouldDisable = true;
+                if (val === '12-14' && currentHour >= 14) shouldDisable = true;
+                if (val === '14-16' && currentHour >= 16) shouldDisable = true;
+                if (val === '16-18' && currentHour >= 18) shouldDisable = true;
+                if (val === '18-20' && currentHour >= 20) shouldDisable = true;
+              }
+              opt.disabled = shouldDisable;
+              if (!shouldDisable) {
+                availableCount++;
+                if (firstAvailableIndex === -1) firstAvailableIndex = i;
+              }
+            }
+
+            if (timeSelect.selectedOptions[0]?.disabled && firstAvailableIndex !== -1) {
+              timeSelect.selectedIndex = firstAvailableIndex;
+            }
+
+            const searchBtn = document.querySelector('.btn-premium-search');
+            if (isToday && availableCount === 0) {
+              if (searchBtn) {
+                searchBtn.style.opacity = '0.5';
+                searchBtn.style.pointerEvents = 'none';
+                searchBtn.innerText = 'No Slots Available for Today';
+              }
+            } else {
+              if (searchBtn) {
+                searchBtn.style.opacity = '1';
+                searchBtn.style.pointerEvents = 'auto';
+                searchBtn.innerText = searchBtn.tagName === 'A' ? 'Sign in to continue' : 'Analyze Partner Networks & View AI Recommendations';
+              }
+            }
+          }
+
+          if (dateInput) {
+            dateInput.addEventListener('change', updateTimeSlots);
+            updateTimeSlots();
+          }
+        });
+    </script>
 
       <!-- Area hidden – auto-filled by GPS/map JS -->
       <input type="hidden" name="area" id="area-input"
@@ -436,7 +515,7 @@
 
     <!-- Card 4: Precise Worksite Mapping (full-width) -->
     <div class="wizard-card">
-      <div class="step-indicator" style="background: #ecfdf5; color: #059669;">Step 03</div>
+      <div class="step-indicator" style="background: #ecfdf5; color: #059669;">Step 04</div>
       <div class="step-title"> Precise Worksite Mapping</div>
       
       <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 30px; align-items: start;">
@@ -490,8 +569,9 @@
       <input type="hidden" name="service" value="{{ request.POST.service }}">
       <input type="hidden" name="workers_needed" value="{{ request.POST.workers_needed }}">
       <input type="hidden" name="area" value="{{ request.POST.area }}">
-      <input type="hidden" name="duration" value="{{ request.POST.duration }}">
       <input type="hidden" name="start_date" value="{{ request.POST.start_date }}">
+      <input type="hidden" name="end_date" value="{{ request.POST.end_date }}">
+      <input type="hidden" name="time_slot" value="{{ request.POST.time_slot }}">
       <input type="hidden" name="description" value="{{ request.POST.description }}">
       <input type="hidden" name="strategic_notes" value="{{ request.POST.strategic_notes }}">
       <input type="hidden" name="name" value="{{ client_name }}">

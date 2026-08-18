@@ -179,8 +179,29 @@
 
     function searchLoc() {
         let place = document.getElementById("searchBox").value;
-        if (!place) return;
-        fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${place}`)
+        
+        // If search box is empty, try browser geolocation
+        if (!place) {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition((position) => {
+                    const lat = position.coords.latitude;
+                    const lon = position.coords.longitude;
+                    map.setView([lat, lon], 15);
+                    if (marker) map.removeLayer(marker);
+                    marker = L.marker([lat, lon]).addTo(map);
+                    document.getElementById("lat").value = lat;
+                    document.getElementById("lon").value = lon;
+                }, () => {
+                    alert("Please enter a territory or enable location services.");
+                });
+            } else {
+                alert("Please enter a territory to search.");
+            }
+            return;
+        }
+
+        // Search with URL encoding
+        fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(place)}`)
             .then(res => res.json())
             .then(data => {
                 if (data.length > 0) {
@@ -190,7 +211,13 @@
                     marker = L.marker([lat, lon]).addTo(map);
                     document.getElementById("lat").value = lat;
                     document.getElementById("lon").value = lon;
+                } else {
+                    alert("Location not found. Please try a different search term.");
                 }
+            })
+            .catch(err => {
+                console.error("Search error:", err);
+                alert("An error occurred while searching. Please try again.");
             });
     }
 

@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load i18n %}
 
 {% block title %}Edit Profile | LABOURLINK{% endblock %}
 
@@ -224,6 +225,27 @@
     align-items: center;
     gap: 10px;
   }
+
+  .input-group {
+    position: relative;
+  }
+
+  .error-field {
+    border-color: #ff4d4d !important;
+    background: #fff5f5 !important;
+  }
+
+  .field-error-msg {
+    position: absolute;
+    bottom: -16px;
+    right: 5px;
+    color: #ff4d4d;
+    font-size: 10px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    pointer-events: none;
+  }
 </style>
 {% endblock %}
 
@@ -233,8 +255,7 @@
     <h1 style="margin:0; font-size:36px; font-weight:900; letter-spacing:-1px;">
       Refine Your Profile, {{ user.username }}
     </h1>
-    <p style="opacity: 0.7; font-size: 16px; margin: 12px 0 20px;">Keep your information up to date to get the best
-      experience.</p>
+    <p style="opacity: 0.7; font-size: 16px; margin: 12px 0 20px;">{% trans "Keep your information up to date to get the best experience." %}</p>
   </div>
 </section>
 
@@ -248,9 +269,8 @@
             d="M19,19H5V8H19M16,1V3H8V1H6V3H5C3.89,3 3,3.89 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V5C21,3.89 20.1,3 19,3H18V1M17,12H12V17H17V12Z" />
         </svg>
       </div>
-      <h3 style="color:#0f172a; margin:0 0 12px 0; font-size:20px; font-weight:800;">Manage Bookings</h3>
-      <p style="color:#64748b; font-size:15px; margin:0; line-height:1.6;">Precision control over your schedule
-        and active client jobs.</p>
+      <h3 style="color:#0f172a; margin:0 0 12px 0; font-size:20px; font-weight:800;">{% trans "Manage Bookings" %}</h3>
+      <p style="color:#64748b; font-size:15px; margin:0; line-height:1.6;">{% trans "Precision control over your schedule and active client jobs." %}</p>
     </a>
     <a href="{% url 'worker_area' %}" class="action-card stagger-2 js-reveal">
       <div class="action-icon">
@@ -258,9 +278,8 @@
           <path d="M15,13L11,10V12H2V14H11V16L15,13M22,13L18,10V12H15V14H18V16L22,13Z" />
         </svg>
       </div>
-      <h3 style="color:#0f172a; margin:0 0 12px 0; font-size:20px; font-weight:800;">Service Area</h3>
-      <p style="color:#64748b; font-size:15px; margin:0; line-height:1.6;">Define your reach. Update where you
-        offer your expertise.</p>
+      <h3 style="color:#0f172a; margin:0 0 12px 0; font-size:20px; font-weight:800;">{% trans "Service Area" %}</h3>
+      <p style="color:#64748b; font-size:15px; margin:0; line-height:1.6;">{% trans "Define your reach. Update where you offer your expertise." %}</p>
     </a>
     <a href="{% url 'worker_availability' %}" class="action-card stagger-3 js-reveal">
       <div class="action-icon">
@@ -269,9 +288,8 @@
             d="M12,2A10,10 0 1,0 22,12A10,10 0 0,0 12,2M12,20A8,8 0 1,1 20,12A8,8 0 0,1 12,20M11,12.5V7H12.5V11.25L15.31,12.91L14.56,14.17L11,12.5Z" />
         </svg>
       </div>
-      <h3 style="color:#0f172a; margin:0 0 12px 0; font-size:20px; font-weight:800;">Availability</h3>
-      <p style="color:#64748b; font-size:15px; margin:0; line-height:1.6;">Switch your visibility. Control when
-        customers can find you.</p>
+      <h3 style="color:#0f172a; margin:0 0 12px 0; font-size:20px; font-weight:800;">{% trans "Availability" %}</h3>
+      <p style="color:#64748b; font-size:15px; margin:0; line-height:1.6;">{% trans "Switch your visibility. Control when customers can find you." %}</p>
     </a>
   </div>
   {% endif %}
@@ -279,55 +297,64 @@
     <form method="post">
       {% csrf_token %}
 
-      <div class="section-title"> Basic Information</div>
+      <div class="section-title"> {% trans "Basic Information" %}</div>
 
       <div class="form-grid">
         <div class="input-group">
-          <label>Username (Read-only)</label>
+          <label>{% trans "Username (Read-only)" %}</label>
           <input type="text" class="input-premium" value="{{ user.username }}" disabled>
         </div>
 
         <div class="input-group">
-          <label>Email Address</label>
-          <input type="email" name="email" class="input-premium" value="{{ user.email }}" required>
+          <label>{% trans "Email Address" %}</label>
+          <input type="email" name="email" class="input-premium {% if errors.email %}error-field{% endif %}" value="{{ user.email }}" required
+                 pattern="[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.(com|net|in|org|co\.in)"
+                 title="Please enter a valid email address (e.g., .com, .net, .in).">
+          {% if errors.email %}<span class="field-error-msg">{{ errors.email }}</span>{% endif %}
         </div>
 
         <div class="input-group">
-          <label>First Name</label>
-          <input type="text" name="first_name" class="input-premium" value="{{ user.first_name }}">
+          <label>{% trans "First Name" %}</label>
+          <input type="text" name="first_name" class="input-premium {% if errors.first_name %}error-field{% endif %}" value="{{ user.first_name }}"
+                 pattern="[A-Za-z\s]+" title="Name should contain only alphabetic characters and spaces.">
+          {% if errors.first_name %}<span class="field-error-msg">{{ errors.first_name }}</span>{% endif %}
         </div>
 
         <div class="input-group">
-          <label>Last Name</label>
-          <input type="text" name="last_name" class="input-premium" value="{{ user.last_name }}">
+          <label>{% trans "Last Name" %}</label>
+          <input type="text" name="last_name" class="input-premium {% if errors.last_name %}error-field{% endif %}" value="{{ user.last_name }}"
+                 pattern="[A-Za-z\s]+" title="Name should contain only alphabetic characters and spaces.">
+          {% if errors.last_name %}<span class="field-error-msg">{{ errors.last_name }}</span>{% endif %}
         </div>
 
         <div class="input-group">
-          <label>Phone Number</label>
-          <input type="tel" name="phone" class="input-premium"
+          <label>{% trans "Phone Number" %}</label>
+          <input type="tel" name="phone" class="input-premium {% if errors.phone %}error-field{% endif %}"
             value="{% if worker %}{{ worker.phone }}{% elif contractor %}{{ contractor.phone }}{% elif client %}{{ client.phone }}{% endif %}"
-            maxlength="10" pattern="\d{10}" oninput="this.value = this.value.replace(/[^0-9]/g, '');" required>
+            maxlength="10" pattern="\d{10}" oninput="this.value = this.value.replace(/[^0-9]/g, '');" required
+            title="Phone number must be exactly 10 digits.">
+          {% if errors.phone %}<span class="field-error-msg">{{ errors.phone }}</span>{% endif %}
         </div>
       </div>
 
       {% if worker %}
-      <div class="section-title"> Worker Details</div>
+      <div class="section-title"> {% trans "Worker Details" %}</div>
       <div class="form-grid">
         <div class="input-group">
-          <label>Base Area</label>
+          <label>{% trans "Base Area" %}</label>
           <input type="text" name="area" class="input-premium" value="{{ worker.area }}" required>
         </div>
       </div>
       {% elif contractor %}
-      <div class="section-title"> Contractor Details</div>
+      <div class="section-title"> {% trans "Contractor Details" %}</div>
       <div class="form-grid">
         <div class="input-group" style="grid-column: 1 / -1;">
-          <label>Company Name</label>
+          <label>{% trans "Company Name" %}</label>
           <input type="text" name="company_name" class="input-premium" value="{{ contractor.company_name }}" required>
         </div>
 
         <div class="input-group">
-          <label>Headquarters Area</label>
+          <label>{% trans "Headquarters Area" %}</label>
           <input type="text" name="area" class="input-premium" value="{{ contractor.area }}" required>
         </div>
       </div>
@@ -336,7 +363,7 @@
       {% endif %}
 
       <button type="submit" class="btn-save">
-        Save Changes
+        {% trans "Save Changes" %}
       </button>
     </form>
   </div>

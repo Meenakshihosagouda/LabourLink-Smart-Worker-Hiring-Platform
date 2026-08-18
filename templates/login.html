@@ -1,3 +1,4 @@
+{% load i18n %}
 <!DOCTYPE html>
 <html lang="en">
 
@@ -382,8 +383,8 @@
     <!-- SIGN UP -->
     <div class="form-container sign-up">
       <div style="height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 0 40px; text-align: center;">
-        <h2 style="margin-bottom: 20px;">Join LABOURLINK</h2>
-        <p style="color: var(--slate-400); font-size: 14px; margin-bottom: 30px;">Choose how you'd like to use our platform</p>
+        <h2 style="margin-bottom: 20px;">{% trans "Join LABOURLINK" %}</h2>
+        <p style="color: var(--slate-400); font-size: 14px; margin-bottom: 30px;">{% trans "Choose how you'd like to use our platform" %}</p>
         
         <div style="width: 100%; display: grid; gap: 16px;">
           <a href="{% url 'register_user' %}" style="text-decoration: none; display: flex; align-items: center; gap: 15px; padding: 20px; background: #f8fafc; border-radius: 20px; text-align: left; transition: all 0.3s; border: 2px solid transparent;" onmouseover="this.style.borderColor='var(--blue-600)'; this.style.background='white'" onmouseout="this.style.borderColor='transparent'; this.style.background='#f8fafc'">
@@ -391,8 +392,8 @@
               <i data-lucide="shopping-bag"></i>
             </div>
             <div>
-              <div style="font-weight: 700; color: var(--navy-900);">Hire a Worker</div>
-              <div style="font-size: 12px; color: var(--slate-400);">I need help with a project</div>
+              <div style="font-weight: 700; color: var(--navy-900);">{% trans "Hire a Worker" %}</div>
+              <div style="font-size: 12px; color: var(--slate-400);">{% trans "I need help with a project" %}</div>
             </div>
           </a>
 
@@ -401,8 +402,8 @@
               <i data-lucide="hammer"></i>
             </div>
             <div>
-              <div style="font-weight: 700; color: var(--navy-900);">I am a Worker</div>
-              <div style="font-size: 12px; color: var(--slate-400);">Offer my skills to clients</div>
+              <div style="font-weight: 700; color: var(--navy-900);">{% trans "I am a Worker" %}</div>
+              <div style="font-size: 12px; color: var(--slate-400);">{% trans "Offer my skills to clients" %}</div>
             </div>
           </a>
 
@@ -411,8 +412,8 @@
               <i data-lucide="building"></i>
             </div>
             <div>
-              <div style="font-weight: 700; color: var(--navy-900);">I am a Contractor</div>
-              <div style="font-size: 12px; color: var(--slate-400);">Manage a team of workers</div>
+              <div style="font-weight: 700; color: var(--navy-900);">{% trans "I am a Contractor" %}</div>
+              <div style="font-size: 12px; color: var(--slate-400);">{% trans "Manage a team of workers" %}</div>
             </div>
           </a>
         </div>
@@ -423,7 +424,7 @@
     <div class="form-container sign-in">
       <form method="post" action="{% url 'login' %}">
         {% csrf_token %}
-        <h2>Welcome Back</h2>
+        <h2>{% trans "Welcome Back" %}</h2>
 
         {% if error %}
         <div class="err">
@@ -433,16 +434,16 @@
 
         <div class="input-group">
           <i data-lucide="user-plus"></i>
-          <input name="username" placeholder="Username" autocomplete="username" required>
+          <input name="username" placeholder="{% trans 'Username' %}" autocomplete="username" required>
         </div>
         <div class="input-group">
           <i data-lucide="key-round"></i>
-          <input name="password" type="password" placeholder="Password" autocomplete="current-password" required>
+          <input name="password" type="password" placeholder="{% trans 'Password' %}" autocomplete="current-password" required>
         </div>
-        <button class="btn-premium">Sign In</button>
+        <button class="btn-premium">{% trans "Sign In" %}</button>
         
         <p style="margin-top: 30px; font-size: 13px; color: var(--slate-400);">
-          <a href="{% url 'password_reset' %}" style="color: inherit; text-decoration: none;">Forgot Password?</a>
+          <a href="{% url 'password_reset' %}" style="color: inherit; text-decoration: none;">{% trans "Forgot Password?" %}</a>
         </p>
       </form>
     </div>
@@ -451,14 +452,14 @@
     <div class="overlay-container">
       <div class="overlay">
         <div class="overlay-panel overlay-left">
-          <h1>Welcome<br>Back!</h1>
-          <p>Access your dashboard and manage your professional connections with ease.</p>
-          <button class="btn-ghost" id="signIn">Return to Login</button>
+          <h1>{% trans "Welcome" %}<br>{% trans "Back!" %}</h1>
+          <p>{% trans "Access your dashboard and manage your professional connections with ease." %}</p>
+          <button class="btn-ghost" id="signIn">{% trans "Return to Login" %}</button>
         </div>
         <div class="overlay-panel overlay-right">
-          <h1>Hello,<br>Friend!</h1>
-          <p>Enter your details and start your journey with the most reliable local network.</p>
-          <button class="btn-ghost" id="signUp">Create Account</button>
+          <h1>{% trans "Hello," %}<br>{% trans "Friend!" %}</h1>
+          <p>{% trans "Enter your details and start your journey with the most reliable local network." %}</p>
+          <button class="btn-ghost" id="signUp">{% trans "Create Account" %}</button>
         </div>
       </div>
     </div>
@@ -471,13 +472,13 @@
       <div style="width: 60px; height: 60px; background: #fef3c7; border-radius: 20px; display: flex; align-items: center; justify-content: center; color: #d97706; margin: 0 auto 20px;">
         <i data-lucide="help-circle"></i>
       </div>
-      <h3>Support & Recovery</h3>
-      <p>Forgot your password or experiencing issues? Our support team is here to help you get back on track.</p>
+      <h3>{% trans "Support & Recovery" %}</h3>
+      <p>{% trans "Forgot your password or experiencing issues? Our support team is here to help you get back on track." %}</p>
       <div style="background: var(--slate-100); padding: 15px; border-radius: 12px; margin-bottom: 25px;">
-        <div style="font-weight: 700; color: var(--navy-900); font-size: 14px;">Contact Support</div>
+        <div style="font-weight: 700; color: var(--navy-900); font-size: 14px;">{% trans "Contact Support" %}</div>
         <div style="font-size: 13px; color: var(--blue-600); margin-top: 5px;">support@LABOURLINK.com</div>
       </div>
-      <button class="btn-premium" style="margin-top: 0; width: auto; padding: 12px 40px;" onclick="closeSupport()">Got it</button>
+      <button class="btn-premium" style="margin-top: 0; width: auto; padding: 12px 40px;" onclick="closeSupport()">{% trans "Got it" %}</button>
     </div>
   </div>
 

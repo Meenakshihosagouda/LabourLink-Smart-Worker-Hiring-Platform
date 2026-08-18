@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load static %}
+{% load i18n %}
 
 {% block title %}Submit Review | LABOURLINK{% endblock %}
 
@@ -105,8 +106,8 @@
 
 {% block content %}
 <div class="review-hero">
-    <h1 style="margin:0; font-size:32px;">Share Your Experience</h1>
-    <p style="opacity:0.8; margin-top:10px;">Help others find the best professionals by leaving a rating and review.</p>
+    <h1 style="margin:0; font-size:32px;">{% trans "Share Your Experience" %}</h1>
+    <p style="opacity:0.8; margin-top:10px;">{% trans "Help others find the best professionals by leaving a rating and review." %}</p>
 </div>
 
 <div class="review-card">
@@ -116,14 +117,14 @@
         <p>{{ hire.worker.service.name }}</p>
         {% elif bulk_request %}
         <h2>{{ bulk_request.contractor.company_name }}</h2>
-        <p>{{ bulk_request.service.name }} (Bulk Project)</p>
+        <p>{{ bulk_request.service.name }} ({% trans "Bulk Project" %})</p>
         {% endif %}
     </div>
 
     <form method="post">
         {% csrf_token %}
 
-        <div style="font-weight: 700; color: #64748b; margin-bottom: 8px;">Select Rating</div>
+        <div style="font-weight: 700; color: #64748b; margin-bottom: 8px;">{% trans "Select Rating" %}</div>
         <div class="rating-container">
             <input type="radio" name="rating" value="5" id="5" required><label for="5">★</label>
             <input type="radio" name="rating" value="4" id="4"><label for="4">★</label>
@@ -132,9 +133,9 @@
             <input type="radio" name="rating" value="1" id="1"><label for="1">★</label>
         </div>
 
-        <textarea name="comment" rows="4" placeholder="How was your experience? (Optional Review)"></textarea>
+        <textarea name="comment" rows="4" placeholder="{% trans 'How was your experience? (Optional Review)' %}"></textarea>
 
-        <button type="submit" class="btn-submit">Submit Review</button>
+        <button type="submit" class="btn-submit">{% trans "Submit Review" %}</button>
     </form>
 </div>
 {% endblock %}
